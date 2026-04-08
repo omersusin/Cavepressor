@@ -10,6 +10,7 @@ import com.omersusin.cavepressor.domain.model.CompressionResult
 import com.omersusin.cavepressor.domain.usecase.CompressTextUseCase
 import com.omersusin.cavepressor.domain.usecase.FetchModelsUseCase
 import com.omersusin.cavepressor.domain.usecase.GetHistoryUseCase
+import com.omersusin.cavepressor.ui.theme.AppThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +37,7 @@ data class SettingsUiState(
     val groqKey: String = "",
     val availableModels: List<CaveModel> = emptyList(),
     val isLoadingModels: Boolean = false,
+    val appTheme: AppThemeType = AppThemeType.SAGE,
     val darkTheme: Boolean = true,
     val useDynamicColor: Boolean = false
 )
@@ -85,6 +87,11 @@ class CompressorViewModel @Inject constructor(
         viewModelScope.launch {
             settings.groqApiKey.collect { key ->
                 _settingsState.update { it.copy(groqKey = key) }
+            }
+        }
+        viewModelScope.launch {
+            settings.appTheme.collect { theme ->
+                _settingsState.update { it.copy(appTheme = theme) }
             }
         }
         viewModelScope.launch {
@@ -153,6 +160,10 @@ class CompressorViewModel @Inject constructor(
 
     fun setGroqKey(key: String) {
         viewModelScope.launch { settings.setGroqApiKey(key) }
+    }
+
+    fun setAppTheme(theme: AppThemeType) {
+        viewModelScope.launch { settings.setAppTheme(theme) }
     }
 
     fun setDarkTheme(dark: Boolean) {

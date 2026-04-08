@@ -69,7 +69,6 @@ fun SettingsScreen(
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
     var customModelInput by remember { mutableStateOf("") }
-    var activeTheme by remember { mutableStateOf(AppThemeType.SAGE) }
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(settings.selectedProvider) {
@@ -301,8 +300,8 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     ThemeSelectorGrid(
-                        selectedTheme = activeTheme,
-                        onThemeSelected = { activeTheme = it }
+                        selectedTheme = settings.appTheme,
+                        onThemeSelected = { viewModel.setAppTheme(it) }
                     )
                 }
             }

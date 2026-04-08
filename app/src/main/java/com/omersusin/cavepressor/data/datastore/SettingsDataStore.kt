@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.omersusin.cavepressor.domain.model.ApiProvider
 import com.omersusin.cavepressor.domain.model.CompressionLevel
+import com.omersusin.cavepressor.ui.theme.AppThemeType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,6 +28,7 @@ class SettingsDataStore @Inject constructor(
         val KEY_SELECTED_PROVIDER = stringPreferencesKey("selected_provider")
         val KEY_SELECTED_MODEL = stringPreferencesKey("selected_model")
         val KEY_COMPRESSION_LEVEL = stringPreferencesKey("compression_level")
+        val KEY_APP_THEME = stringPreferencesKey("app_theme")
         val KEY_DARK_THEME = booleanPreferencesKey("dark_theme")
         val KEY_USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
     }
@@ -50,6 +52,12 @@ class SettingsDataStore @Inject constructor(
         .map {
             val name = it[KEY_COMPRESSION_LEVEL] ?: CompressionLevel.MEDIUM.name
             CompressionLevel.valueOf(name)
+        }
+
+    val appTheme: Flow<AppThemeType> = context.dataStore.data
+        .map {
+            val name = it[KEY_APP_THEME] ?: AppThemeType.SAGE.name
+            AppThemeType.valueOf(name)
         }
 
     val darkTheme: Flow<Boolean> = context.dataStore.data
@@ -76,6 +84,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setCompressionLevel(level: CompressionLevel) {
         context.dataStore.edit { it[KEY_COMPRESSION_LEVEL] = level.name }
+    }
+
+    suspend fun setAppTheme(theme: AppThemeType) {
+        context.dataStore.edit { it[KEY_APP_THEME] = theme.name }
     }
 
     suspend fun setDarkTheme(dark: Boolean) {

@@ -38,7 +38,8 @@ class MainActivity : ComponentActivity() {
 
             CavepressorTheme(
                 darkTheme = settingsState.darkTheme,
-                dynamicColor = settingsState.useDynamicColor
+                dynamicColor = settingsState.useDynamicColor,
+                themeType = settingsState.appTheme
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
