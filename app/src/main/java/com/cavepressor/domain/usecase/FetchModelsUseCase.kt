@@ -41,10 +41,21 @@ class FetchModelsUseCase @Inject constructor(
         CaveModel("deepseek/deepseek-r1", "DeepSeek R1", ApiProvider.OPENROUTER)
     )
 
+    private val huggingFaceModels = listOf(
+        CaveModel("meta-llama/Llama-3.2-3B-Instruct", "Llama 3.2 3B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Meta-Llama-3-8B-Instruct", "Llama 3 8B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("mistralai/Mistral-7B-Instruct-v0.3", "Mistral 7B Instruct v0.3", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("microsoft/Phi-3-mini-4k-instruct", "Phi-3 Mini 4K Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("google/gemma-2-2b-it", "Gemma 2 2B IT", ApiProvider.HUGGING_FACE),
+        CaveModel("deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B", "DeepSeek R1 Distill 1.5B", ApiProvider.HUGGING_FACE)
+    )
+
     suspend operator fun invoke(provider: ApiProvider): Result<List<CaveModel>> {
         return try {
             when (provider) {
                 ApiProvider.GROQ -> Result.success(groqModels)
+                ApiProvider.HUGGING_FACE -> Result.success(huggingFaceModels)
                 ApiProvider.OPENROUTER -> {
                     val apiKey = settings.openRouterApiKey.first()
                     if (apiKey.isBlank()) {

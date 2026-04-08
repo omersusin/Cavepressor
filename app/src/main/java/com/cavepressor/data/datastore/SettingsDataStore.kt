@@ -26,13 +26,15 @@ class SettingsDataStore @Inject constructor(
     companion object {
         val KEY_OPENROUTER_API_KEY = stringPreferencesKey("openrouter_api_key")
         val KEY_GROQ_API_KEY = stringPreferencesKey("groq_api_key")
+        val KEY_HUGGING_FACE_API_KEY = stringPreferencesKey("hugging_face_api_key")
         val KEY_SELECTED_PROVIDER = stringPreferencesKey("selected_provider")
         val KEY_SELECTED_MODEL = stringPreferencesKey("selected_model")
         val KEY_COMPRESSION_LEVEL = stringPreferencesKey("compression_level")
         val KEY_APP_THEME = stringPreferencesKey("app_theme")
         val KEY_DARK_THEME = booleanPreferencesKey("dark_theme")
         val KEY_USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
-        val KEY_CUSTOM_COLOR = intPreferencesKey("custom_color")
+                val KEY_CUSTOM_COLOR = intPreferencesKey("custom_color")
+        val KEY_ENGINE_TYPE = stringPreferencesKey("engine_type")
     }
 
     val openRouterApiKey: Flow<String> = context.dataStore.data
@@ -40,6 +42,9 @@ class SettingsDataStore @Inject constructor(
 
     val groqApiKey: Flow<String> = context.dataStore.data
         .map { it[KEY_GROQ_API_KEY] ?: "" }
+
+    val huggingFaceApiKey: Flow<String> = context.dataStore.data
+        .map { it[KEY_HUGGING_FACE_API_KEY] ?: "" }
 
     val selectedProvider: Flow<ApiProvider> = context.dataStore.data
         .map {
@@ -68,6 +73,12 @@ class SettingsDataStore @Inject constructor(
     val customColor: Flow<Int> = context.dataStore.data
         .map { it[KEY_CUSTOM_COLOR] ?: android.graphics.Color.GREEN }
 
+    val engineType: Flow<EngineType> = context.dataStore.data
+        .map { preferences ->
+            val name = preferences[KEY_ENGINE_TYPE] ?: EngineType.CLOUD_LLM.name
+            try { EngineType.valueOf(name) } catch (e: Exception) { EngineType.CLOUD_LLM }
+        }
+
     val useDynamicColor: Flow<Boolean> = context.dataStore.data
         .map { it[KEY_USE_DYNAMIC_COLOR] ?: false }
 
@@ -77,6 +88,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setGroqApiKey(key: String) {
         context.dataStore.edit { it[KEY_GROQ_API_KEY] = key }
+    }
+
+    suspend fun setHuggingFaceApiKey(key: String) {
+        context.dataStore.edit { it[KEY_HUGGING_FACE_API_KEY] = key }
     }
 
     suspend fun setSelectedProvider(provider: ApiProvider) {
@@ -93,6 +108,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setAppTheme(theme: AppThemeType) {
         context.dataStore.edit { it[KEY_APP_THEME] = theme.name }
+    }
+
+    suspend fun setEngineType(type: EngineType) {
+        context.dataStore.edit { it[KEY_ENGINE_TYPE] = type.name }
     }
 
     suspend fun setCustomColor(color: Int) {

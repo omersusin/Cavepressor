@@ -11,6 +11,7 @@ import com.cavepressor.domain.usecase.CompressTextUseCase
 import com.cavepressor.domain.usecase.FetchModelsUseCase
 import com.cavepressor.domain.usecase.GetHistoryUseCase
 import com.cavepressor.ui.theme.AppThemeType
+import com.cavepressor.data.datastore.EngineType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,12 +36,14 @@ data class SettingsUiState(
     val compressionLevel: CompressionLevel = CompressionLevel.MEDIUM,
     val openRouterKey: String = "",
     val groqKey: String = "",
+    val huggingFaceKey: String = "",
     val availableModels: List<CaveModel> = emptyList(),
     val isLoadingModels: Boolean = false,
     val appTheme: AppThemeType = AppThemeType.SAGE,
     val darkTheme: Boolean = true,
     val useDynamicColor: Boolean = false,
-    val customColor: Int = android.graphics.Color.GREEN
+    val customColor: Int = android.graphics.Color.GREEN,
+    val engineType: EngineType = EngineType.CLOUD_LLM
 )
 
 @HiltViewModel
@@ -88,6 +91,11 @@ class CompressorViewModel @Inject constructor(
         viewModelScope.launch {
             settings.groqApiKey.collect { key ->
                 _settingsState.update { it.copy(groqKey = key) }
+            }
+        }
+        viewModelScope.launch {
+            settings.engineType.collect { type ->
+                _settingsState.update { it.copy(engineType = type) }
             }
         }
         viewModelScope.launch {
@@ -166,6 +174,14 @@ class CompressorViewModel @Inject constructor(
 
     fun setGroqKey(key: String) {
         viewModelScope.launch { settings.setGroqApiKey(key) }
+    }
+
+    fun setHuggingFaceKey(key: String) {
+        viewModelScope.launch { settings.setHuggingFaceApiKey(key) }
+    }
+
+    fun setEngineType(type: EngineType) {
+        viewModelScope.launch { settings.setEngineType(type) }
     }
 
     fun setCustomColor(color: Int) {

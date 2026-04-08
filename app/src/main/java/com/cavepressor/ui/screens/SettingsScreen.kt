@@ -1,5 +1,8 @@
 package com.cavepressor.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -58,6 +61,10 @@ import com.cavepressor.ui.components.ApiKeyDialog
 import com.cavepressor.ui.components.ModelSelector
 import com.cavepressor.ui.components.ThemeSelectorGrid
 import com.cavepressor.ui.theme.AppThemeType
+import com.cavepressor.data.datastore.EngineType
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
+
 import com.cavepressor.viewmodel.CompressorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +76,7 @@ fun SettingsScreen(
     val settings by viewModel.settingsState.collectAsState()
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
+    var showHfDialog by remember { mutableStateOf(false) }
     var customModelInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     var showColorPicker by remember { mutableStateOf(false) }
@@ -98,6 +106,18 @@ if (showColorPicker) {
                 showColorPicker = false
             },
             onDismiss = { showColorPicker = false }
+        )
+    }
+
+    if (showHfDialog) {
+        ApiKeyDialog(
+            providerName = "Hugging Face",
+            currentKey = settings.huggingFaceKey,
+            onConfirm = {
+                viewModel.setHuggingFaceKey(it)
+                showHfDialog = false
+            },
+            onDismiss = { showHfDialog = false }
         )
     }
 
@@ -241,6 +261,7 @@ if (showColorPicker) {
                                     text = when (settings.selectedProvider) {
                                         ApiProvider.GROQ -> "llama-3.3-70b-versatile"
                                         ApiProvider.OPENROUTER -> "openai/gpt-4o-mini"
+                                        ApiProvider.HUGGING_FACE -> "meta-llama/Llama-3.2-3B-Instruct"
                                     },
                                     style = MaterialTheme.typography.bodySmall
                                 )

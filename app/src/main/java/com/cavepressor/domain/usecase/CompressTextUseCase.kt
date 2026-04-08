@@ -25,6 +25,7 @@ class CompressTextUseCase @Inject constructor(
             val apiKey = when (provider) {
                 ApiProvider.OPENROUTER -> settings.openRouterApiKey.first()
                 ApiProvider.GROQ -> settings.groqApiKey.first()
+                ApiProvider.HUGGING_FACE -> settings.huggingFaceApiKey.first()
             }
 
             if (apiKey.isBlank()) {
@@ -65,6 +66,14 @@ class CompressTextUseCase @Inject constructor(
                     val response = api.compress(request)
                     response.choices.firstOrNull()?.message?.content
                         ?: return Result.failure(Exception("Empty response from Groq"))
+                }
+                ApiProvider.HUGGING_FACE -> {
+                    val api = NetworkModule.buildHuggingFaceApi(apiKey.trim(), moshi)
+                    // Not every model supports system prompts gracefully on some free spaces,
+                    // but the v1/chat/completions conforms to standard messages array.
+                    val response = api.compress(request)
+                    response.choices.firstOrNull()?.message?.content
+                        ?: return Result.failure(Exception("Empty response from Hugging Face"))
                 }
             }
 
