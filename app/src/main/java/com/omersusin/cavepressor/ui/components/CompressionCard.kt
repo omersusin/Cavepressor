@@ -13,6 +13,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,7 +45,6 @@ fun CompressionCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-            // Başlık satırı
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -60,7 +60,6 @@ fun CompressionCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Progress bar
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
@@ -77,7 +76,6 @@ fun CompressionCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Token karşılaştırma
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -103,9 +101,8 @@ fun CompressionCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Model + provider
             Text(
-                text = "${result.provider.displayName} · ${result.model.substringAfterLast("/").substringAfterLast("-").let { result.model }}",
+                text = "${result.provider.displayName} · ${result.model}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 maxLines = 1
