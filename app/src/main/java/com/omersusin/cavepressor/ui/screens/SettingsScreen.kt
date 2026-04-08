@@ -444,4 +444,4 @@ private fun SettingsToggleRow(
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
-// dynamic color toggle zaten SettingsToggleRow ile eklenecek — aşağıda patch ile yapılıyor
+

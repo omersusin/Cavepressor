@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
@@ -34,7 +33,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +65,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.omersusin.cavepressor.domain.model.CompressionLevel
-import com.omersusin.cavepressor.domain.model.CompressionResult
 import com.omersusin.cavepressor.ui.components.CompressionCard
 import com.omersusin.cavepressor.ui.components.TokenCounter
 import com.omersusin.cavepressor.viewmodel.CompressorViewModel
@@ -195,38 +192,36 @@ fun HomeScreen(
             }
 
             // Sonuç
-            if (uiState.result != null) {
-                item {
-                    AnimatedVisibility(
-                        visible = true,
-                        enter = fadeIn() + slideInVertically { it / 2 },
-                        exit = fadeOut() + slideOutVertically { it / 2 }
-                    ) {
-                        uiState.result?.let { result ->
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                CompressionCard(result = result)
+            item {
+                AnimatedVisibility(
+                    visible = uiState.result != null,
+                    enter = fadeIn() + slideInVertically { it / 2 },
+                    exit = fadeOut() + slideOutVertically { it / 2 }
+                ) {
+                    uiState.result?.let { result ->
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CompressionCard(result = result)
 
-                                CompressedTextBox(
-                                    text = result.compressedText,
-                                    onCopy = {
-                                        clipboard.setText(AnnotatedString(result.compressedText))
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar("Copied to clipboard ✓")
-                                        }
-                                    },
-                                    onShare = {
-                                        val intent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, result.compressedText)
-                                        }
-                                        context.startActivity(
-                                            Intent.createChooser(intent, "Share compressed text")
-                                        )
+                            CompressedTextBox(
+                                text = result.compressedText,
+                                onCopy = {
+                                    clipboard.setText(AnnotatedString(result.compressedText))
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Copied to clipboard ✓")
                                     }
-                                )
+                                },
+                                onShare = {
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, result.compressedText)
+                                    }
+                                    context.startActivity(
+                                        Intent.createChooser(intent, "Share compressed text")
+                                    )
+                                }
+                            )
 
-                                OriginalTextBox(text = result.originalText)
-                            }
+                            OriginalTextBox(text = result.originalText)
                         }
                     }
                 }
