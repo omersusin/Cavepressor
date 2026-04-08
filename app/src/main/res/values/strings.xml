@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Cavepressor</string>
+    <string name="compress">Compress</string>
+    <string name="decompress">Decompress</string>
+    <string name="history">History</string>
+    <string name="settings">Settings</string>
+    <string name="input_hint">Paste your text here...</string>
+    <string name="token_count">%d tokens</string>
+    <string name="reduction">%d%% reduction</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    <string name="api_key">API Key</string>
+    <string name="select_provider">Select Provider</string>
+    <string name="select_model">Select Model</string>
+    <string name="compression_level">Compression Level</string>
+    <string name="light">Light %d%%</string>
+    <string name="medium">Medium %d%%</string>
+    <string name="aggressive">Aggressive %d%%</string>
+    <string name="no_history">No compressions yet</string>
+    <string name="clear_history">Clear History</string>
+    <string name="original">Original</string>
+    <string name="compressed">Compressed</string>
+</resources>
