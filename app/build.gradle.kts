@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
     implementation(libs.moshi.kotlin)
+    implementation(libs.mediapipe.tasks.genai)
     ksp(libs.moshi.compiler)
     ksp(libs.androidx.room.compiler)
 

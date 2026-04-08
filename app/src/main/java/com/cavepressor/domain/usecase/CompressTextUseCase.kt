@@ -2,7 +2,9 @@ package com.cavepressor.domain.usecase
 
 import com.cavepressor.data.datastore.SettingsDataStore
 import com.cavepressor.data.repository.CompressionRepository
+import com.cavepressor.data.llm.LocalLlmService
 import com.cavepressor.di.NetworkModule
+import com.cavepressor.data.datastore.EngineType
 import com.cavepressor.domain.model.ApiProvider
 import com.cavepressor.domain.model.CompressionLevel
 import com.cavepressor.domain.model.CompressionResult
@@ -15,13 +17,36 @@ import javax.inject.Inject
 class CompressTextUseCase @Inject constructor(
     private val settings: SettingsDataStore,
     private val repository: CompressionRepository,
+    private val localLlmService: LocalLlmService,
     private val moshi: Moshi
 ) {
     suspend operator fun invoke(text: String): Result<CompressionResult> {
         return try {
+            val engineType = settings.engineType.first()
             val provider = settings.selectedProvider.first()
             val model = settings.selectedModel.first()
             val level = settings.compressionLevel.first()
+            
+            if (engineType == EngineType.LOCAL_LLM) {
+                // Determine model file - assuming fixed for now, e.g., "gemma-2b-it-cpu-int4.bin"
+                val modelFileName = "gemma-2b-it-gpu-int4.bin"
+                
+                val initResult = localLlmService.initialize(modelFileName)
+                if (initResult.isFailure) {
+                    return Result.failure(Exception("Failed to initialize Local LLM: ${initResult.exceptionOrNull()?.message}"))
+                }
+                
+                val prompt = "${buildSystemPrompt(level)}\n\nUser Text:\n${text.trim()}"
+                val generateResult = localLlmService.generateResponse(prompt)
+                
+                if (generateResult.isFailure) {
+                    return Result.failure(Exception("Local LLM Compression Failed: ${generateResult.exceptionOrNull()?.message}"))
+                }
+                
+                val responseText = generateResult.getOrThrow()
+                return saveAndReturnResult(text, responseText, modelFileName, provider, level)
+            }
+            
             val apiKey = when (provider) {
                 ApiProvider.OPENROUTER -> settings.openRouterApiKey.first()
                 ApiProvider.GROQ -> settings.groqApiKey.first()
@@ -77,25 +102,7 @@ class CompressTextUseCase @Inject constructor(
                 }
             }
 
-            val originalTokens = estimateTokens(text)
-            val compressedTokens = estimateTokens(responseText)
-            val reduction = if (originalTokens > 0) {
-                ((originalTokens - compressedTokens) * 100 / originalTokens).coerceIn(0, 99)
-            } else 0
-
-            val result = CompressionResult(
-                originalText = text,
-                compressedText = responseText,
-                originalTokens = originalTokens,
-                compressedTokens = compressedTokens,
-                reductionPercent = reduction,
-                provider = provider,
-                model = model,
-                level = level
-            )
-
-            val savedId = repository.save(result)
-            Result.success(result.copy(id = savedId))
+            return saveAndReturnResult(text, responseText, model, provider, level)
 
         } catch (e: retrofit2.HttpException) {
             val errorBody = e.response()?.errorBody()?.string() ?: "No error body"
@@ -103,6 +110,34 @@ class CompressTextUseCase @Inject constructor(
         } catch (e: Exception) {
             Result.failure(Exception(e.message ?: "Unknown error"))
         }
+    }
+
+    private suspend fun saveAndReturnResult(
+        originalText: String,
+        compressedText: String,
+        model: String,
+        provider: ApiProvider,
+        level: CompressionLevel
+    ): Result<CompressionResult> {
+        val originalTokens = estimateTokens(originalText)
+        val compressedTokens = estimateTokens(compressedText)
+        val reduction = if (originalTokens > 0) {
+            ((originalTokens - compressedTokens) * 100 / originalTokens).coerceIn(0, 99)
+        } else 0
+
+        val result = CompressionResult(
+            originalText = originalText,
+            compressedText = compressedText,
+            originalTokens = originalTokens,
+            compressedTokens = compressedTokens,
+            reductionPercent = reduction,
+            provider = provider,
+            model = model,
+            level = level
+        )
+
+        val savedId = repository.save(result)
+        return Result.success(result.copy(id = savedId))
     }
 
     private fun buildSystemPrompt(level: CompressionLevel): String {

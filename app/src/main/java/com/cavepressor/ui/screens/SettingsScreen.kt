@@ -24,6 +24,9 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -162,6 +165,57 @@ if (showColorPicker) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
+
+            // AI Engine Type seçimi
+            item {
+                SettingsSectionCard(title = "AI Engine Type", icon = Icons.Default.Memory) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        EngineType.entries.filter { it != EngineType.NLP }.forEach { type ->
+                            val displayName = when (type) {
+                                EngineType.CLOUD_LLM -> "Cloud API"
+                                EngineType.LOCAL_LLM -> "Local Phone"
+                                else -> "Basic NLP"
+                            }
+                            val displayIcon = when (type) {
+                                EngineType.CLOUD_LLM -> Icons.Default.Cloud
+                                EngineType.LOCAL_LLM -> Icons.Default.PhoneAndroid
+                                else -> Icons.Default.Memory
+                            }
+                            FilterChip(
+                                selected = settings.engineType == type,
+                                onClick = { viewModel.setEngineType(type) },
+                                label = { Text(displayName) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = displayIcon,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                        }
+                    }
+                    
+                    if (settings.engineType == EngineType.LOCAL_LLM) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Experimental: Runs an AI model locally using your phone's memory. No internet required. Download manager coming soon.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (settings.engineType == EngineType.CLOUD_LLM) {
             // Provider seçimi
             item {
                 SettingsSectionCard(title = "API Provider", icon = Icons.Default.SmartToy) {
@@ -170,19 +224,30 @@ if (showColorPicker) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         ApiProvider.entries.forEach { provider ->
+                            val providerIcon = when (provider) {
+                                ApiProvider.GROQ -> com.cavepressor.R.drawable.ic_groq
+                                ApiProvider.OPENROUTER -> com.cavepressor.R.drawable.ic_openrouter
+                                ApiProvider.HUGGING_FACE -> com.cavepressor.R.drawable.ic_huggingface
+                            }
                             FilterChip(
                                 selected = settings.selectedProvider == provider,
                                 onClick = { viewModel.setProvider(provider) },
                                 label = { Text(provider.displayName) },
-                                leadingIcon = if (settings.selectedProvider == provider) {
-                                    {
+                                leadingIcon = {
+                                    if (settings.selectedProvider == provider) {
                                         Icon(
                                             Icons.Default.Check,
-                                            null,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    } else {
+                                        Icon(
+                                            painter = androidx.compose.ui.res.painterResource(id = providerIcon),
+                                            contentDescription = null,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }
-                                } else null,
+                                },
                                 modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -206,13 +271,22 @@ if (showColorPicker) {
                     ApiKeyRow(
                         providerName = "OpenRouter",
                         hasKey = settings.openRouterKey.isNotBlank(),
+                        iconRes = com.cavepressor.R.drawable.ic_openrouter,
                         onClick = { showOpenRouterDialog = true }
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     ApiKeyRow(
                         providerName = "Groq",
                         hasKey = settings.groqKey.isNotBlank(),
+                        iconRes = com.cavepressor.R.drawable.ic_groq,
                         onClick = { showGroqDialog = true }
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ApiKeyRow(
+                        providerName = "Hugging Face",
+                        hasKey = settings.huggingFaceKey.isNotBlank(),
+                        iconRes = com.cavepressor.R.drawable.ic_huggingface,
+                        onClick = { showHfDialog = true }
                     )
                 }
             }
@@ -318,6 +392,7 @@ if (showColorPicker) {
                     }
                 }
             }
+            }
 
             // Görünüm
             item {
@@ -416,6 +491,7 @@ private fun SettingsSectionCard(
 private fun ApiKeyRow(
     providerName: String,
     hasKey: Boolean,
+    iconRes: Int? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -423,17 +499,30 @@ private fun ApiKeyRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = providerName,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-            )
-            Text(
-                text = if (hasKey) "Key configured ✓" else "No key set",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (hasKey) MaterialTheme.colorScheme.tertiary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (iconRes != null) {
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(id = iconRes),
+                    contentDescription = providerName,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Column {
+                Text(
+                    text = providerName,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                )
+                Text(
+                    text = if (hasKey) "Key configured ✓" else "No key set",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (hasKey) MaterialTheme.colorScheme.tertiary
+                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
         }
         OutlinedButton(
             onClick = onClick,
