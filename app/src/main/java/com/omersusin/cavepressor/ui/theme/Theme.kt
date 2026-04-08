@@ -10,60 +10,93 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val CaveDarkColorScheme = darkColorScheme(
-    primary = CavePrimary,
-    onPrimary = CaveOnPrimary,
-    primaryContainer = CavePrimaryContainer,
-    onPrimaryContainer = CaveOnPrimaryContainer,
-    secondary = CaveSecondary,
-    onSecondary = CaveOnSecondary,
-    secondaryContainer = CaveSecondaryContainer,
-    onSecondaryContainer = CaveOnSecondaryContainer,
-    tertiary = CaveTertiary,
-    onTertiary = CaveOnTertiary,
-    tertiaryContainer = CaveTertiaryContainer,
-    onTertiaryContainer = CaveOnTertiaryContainer,
-    error = CaveError,
-    onError = CaveOnError,
-    errorContainer = CaveErrorContainer,
-    onErrorContainer = CaveOnErrorContainer,
-    background = CaveBackground,
-    onBackground = CaveOnBackground,
-    surface = CaveSurface,
-    onSurface = CaveOnSurface,
-    surfaceVariant = CaveSurfaceVariant,
-    onSurfaceVariant = CaveOnSurfaceVariant,
-    outline = CaveOutline,
-    outlineVariant = CaveOutlineVariant
-)
+enum class AppThemeType {
+    CRIMSON, VIOLET, OCEAN, SAGE, AMBER, ROSE, MONO, CUSTOM
+}
 
-private val CaveLightColorScheme = lightColorScheme(
-    primary = CavePrimaryLight,
-    onPrimary = CaveOnPrimaryLight,
-    primaryContainer = CavePrimaryContainerLight,
-    onPrimaryContainer = CaveOnPrimaryContainerLight,
-    background = CaveBackgroundLight,
-    onBackground = CaveOnBackgroundLight,
-    surface = CaveSurfaceLight,
-    onSurface = CaveOnSurfaceLight,
-    surfaceVariant = CaveSurfaceVariantLight,
-    onSurfaceVariant = CaveOnSurfaceVariantLight
+// Preset Dark Schemes matching the design provided
+private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = darkColorScheme(
+    primary = when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonPrimary
+        AppThemeType.VIOLET -> VioletPrimary
+        AppThemeType.OCEAN -> OceanPrimary
+        AppThemeType.SAGE -> SagePrimary
+        AppThemeType.AMBER -> AmberPrimary
+        AppThemeType.ROSE -> RosePrimary
+        AppThemeType.MONO -> MonoPrimary
+        AppThemeType.CUSTOM -> CustomPrimary // User's custom settings
+    },
+    secondary = when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonSecondary
+        AppThemeType.VIOLET -> VioletSecondary
+        AppThemeType.OCEAN -> OceanSecondary
+        AppThemeType.SAGE -> SageSecondary
+        AppThemeType.AMBER -> AmberSecondary
+        AppThemeType.ROSE -> RoseSecondary
+        AppThemeType.MONO -> MonoSecondary
+        AppThemeType.CUSTOM -> CustomPrimary
+    },
+    tertiary = when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonTertiary
+        AppThemeType.VIOLET -> VioletTertiary
+        AppThemeType.OCEAN -> OceanTertiary
+        AppThemeType.SAGE -> SageTertiary
+        AppThemeType.AMBER -> AmberTertiary
+        AppThemeType.ROSE -> RoseTertiary
+        AppThemeType.MONO -> MonoTertiary
+        AppThemeType.CUSTOM -> CustomPrimary
+    },
+    background = if (isAmoled) AMOLEDBackground else when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonBackground
+        AppThemeType.VIOLET -> VioletBackground
+        AppThemeType.OCEAN -> OceanBackground
+        AppThemeType.SAGE -> SageBackground
+        AppThemeType.AMBER -> AmberBackground
+        AppThemeType.ROSE -> RoseBackground
+        AppThemeType.MONO -> MonoBackground
+        AppThemeType.CUSTOM -> AMOLEDBackground
+    },
+    surface = if (isAmoled) AMOLEDSurface else when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonSurface
+        AppThemeType.VIOLET -> VioletSurface
+        AppThemeType.OCEAN -> OceanSurface
+        AppThemeType.SAGE -> SageSurface
+        AppThemeType.AMBER -> AmberSurface
+        AppThemeType.ROSE -> RoseSurface
+        AppThemeType.MONO -> MonoSurface
+        AppThemeType.CUSTOM -> AMOLEDSurface
+    },
+    surfaceVariant = when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonSurfaceVariant
+        AppThemeType.VIOLET -> VioletSurfaceVariant
+        AppThemeType.OCEAN -> OceanSurfaceVariant
+        AppThemeType.SAGE -> SageSurfaceVariant
+        AppThemeType.AMBER -> AmberSurfaceVariant
+        AppThemeType.ROSE -> RoseSurfaceVariant
+        AppThemeType.MONO -> MonoSurfaceVariant
+        AppThemeType.CUSTOM -> CrimsonSurfaceVariant
+    },
+    error = CommonError,
+    onError = CommonOnError,
+    errorContainer = CommonErrorContainer,
+    onErrorContainer = CommonOnErrorContainer
 )
 
 @Composable
 fun CavepressorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    isAmoledMode: Boolean = false,
+    themeType: AppThemeType = AppThemeType.SAGE, // Defaulting to Sage based on screenshot
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> CaveDarkColorScheme
-        else -> CaveLightColorScheme
+        darkTheme -> getDarkColorScheme(themeType, isAmoledMode)
+        else -> lightColorScheme() // Light mode not required essentially per user reqs, fallback logic
     }
 
     MaterialTheme(

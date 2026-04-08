@@ -2,45 +2,70 @@ package com.omersusin.cavepressor.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Dark palette — derin mağara tonu
-val CavePrimary = Color(0xFFD4A843)        // amber/gold — meşale ışığı
-val CaveOnPrimary = Color(0xFF1A0F00)
-val CavePrimaryContainer = Color(0xFF3D2800)
-val CaveOnPrimaryContainer = Color(0xFFFFDEA3)
+// Default / Crimson Theme Colors
+val CrimsonPrimary = Color(0xFFB3261E)
+val CrimsonSecondary = Color(0xFF775652)
+val CrimsonTertiary = Color(0xFF705C2E)
+val CrimsonBackground = Color(0xFF201A19)
+val CrimsonSurface = Color(0xFF201A19)
+val CrimsonSurfaceVariant = Color(0xFF534341)
 
-val CaveSecondary = Color(0xFFB5895A)      // toprak tonu
-val CaveOnSecondary = Color(0xFF1A0A00)
-val CaveSecondaryContainer = Color(0xFF2D1800)
-val CaveOnSecondaryContainer = Color(0xFFFFCFA0)
+// Violet Theme Colors
+val VioletPrimary = Color(0xFFD0BCFF)
+val VioletSecondary = Color(0xFFCCC2DC)
+val VioletTertiary = Color(0xFFEFB8C8)
+val VioletBackground = Color(0xFF1C1B1E)
+val VioletSurface = Color(0xFF1C1B1E)
+val VioletSurfaceVariant = Color(0xFF49454F)
 
-val CaveTertiary = Color(0xFF8BC34A)       // biyolüminesans yeşil
-val CaveOnTertiary = Color(0xFF0D1F00)
-val CaveTertiaryContainer = Color(0xFF1A3300)
-val CaveOnTertiaryContainer = Color(0xFFC5F078)
+// Ocean Theme Colors
+val OceanPrimary = Color(0xFF82D3E0)
+val OceanSecondary = Color(0xFFB1CBD0)
+val OceanTertiary = Color(0xFFB5C4EA)
+val OceanBackground = Color(0xFF191C1D)
+val OceanSurface = Color(0xFF191C1D)
+val OceanSurfaceVariant = Color(0xFF3F484A)
 
-val CaveError = Color(0xFFFF6B6B)
-val CaveOnError = Color(0xFF1A0000)
-val CaveErrorContainer = Color(0xFF3D0000)
-val CaveOnErrorContainer = Color(0xFFFFB4B4)
+// Sage Theme Colors
+val SagePrimary = Color(0xFFA8D5BA)
+val SageSecondary = Color(0xFFBFCDBA)
+val SageTertiary = Color(0xFFC0CCCF)
+val SageBackground = Color(0xFF1A1C1A)
+val SageSurface = Color(0xFF1A1C1A)
+val SageSurfaceVariant = Color(0xFF404843)
 
-val CaveBackground = Color(0xFF0F0B08)     // siyaha yakın kahve
-val CaveOnBackground = Color(0xFFEDE0D4)
-val CaveSurface = Color(0xFF1A1410)        // koyu yüzey
-val CaveOnSurface = Color(0xFFEDE0D4)
-val CaveSurfaceVariant = Color(0xFF2C2218)
-val CaveOnSurfaceVariant = Color(0xFFD5C3B0)
-val CaveOutline = Color(0xFF8C7B6B)
-val CaveOutlineVariant = Color(0xFF3D3028)
+// Amber Theme Colors
+val AmberPrimary = Color(0xFFFFB300)
+val AmberSecondary = Color(0xFFD7C5A0)
+val AmberTertiary = Color(0xFFA8D0B3)
+val AmberBackground = Color(0xFF1F1C16)
+val AmberSurface = Color(0xFF1F1C16)
+val AmberSurfaceVariant = Color(0xFF4E4639)
 
-// Light palette
-val CavePrimaryLight = Color(0xFF7B5000)
-val CaveOnPrimaryLight = Color(0xFFFFFFFF)
-val CavePrimaryContainerLight = Color(0xFFFFDEA3)
-val CaveOnPrimaryContainerLight = Color(0xFF271900)
+// Rose Theme Colors
+val RosePrimary = Color(0xFFFFB3B4)
+val RoseSecondary = Color(0xFFE6BDBC)
+val RoseTertiary = Color(0xFFE4C19D)
+val RoseBackground = Color(0xFF201A1A)
+val RoseSurface = Color(0xFF201A1A)
+val RoseSurfaceVariant = Color(0xFF534342)
 
-val CaveBackgroundLight = Color(0xFFFFF8F2)
-val CaveOnBackgroundLight = Color(0xFF1F1B16)
-val CaveSurfaceLight = Color(0xFFFFF8F2)
-val CaveOnSurfaceLight = Color(0xFF1F1B16)
-val CaveSurfaceVariantLight = Color(0xFFF2E0CC)
-val CaveOnSurfaceVariantLight = Color(0xFF4F4539)
+// Mono Theme Colors
+val MonoPrimary = Color(0xFFE3E3E3)
+val MonoSecondary = Color(0xFFC6C6C6)
+val MonoTertiary = Color(0xFFA6A6A6)
+val MonoBackground = Color(0xFF1C1C1C)
+val MonoSurface = Color(0xFF1C1C1C)
+val MonoSurfaceVariant = Color(0xFF474747)
+
+// Common / Shared Colors
+val CustomPrimary = Color(0xFF00FF00) // Fallback for Custom
+
+val CommonOnPrimary = Color(0xFFFFFFFF)
+val CommonError = Color(0xFFF2B8B5)
+val CommonOnError = Color(0xFF601410)
+val CommonErrorContainer = Color(0xFF8C1D18)
+val CommonOnErrorContainer = Color(0xFFF9DEDC)
+
+val AMOLEDBackground = Color(0xFF000000)
+val AMOLEDSurface = Color(0xFF000000)
