@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omersusin.cavepressor.data.datastore.SettingsDataStore
 import com.omersusin.cavepressor.domain.model.ApiProvider
+import com.omersusin.cavepressor.domain.model.AppTheme
 import com.omersusin.cavepressor.domain.model.CaveModel
 import com.omersusin.cavepressor.domain.model.CompressionLevel
 import com.omersusin.cavepressor.domain.model.CompressionResult
@@ -37,7 +38,9 @@ data class SettingsUiState(
     val availableModels: List<CaveModel> = emptyList(),
     val isLoadingModels: Boolean = false,
     val darkTheme: Boolean = true,
-    val useDynamicColor: Boolean = false
+    val amoledMode: Boolean = false,
+    val useDynamicColor: Boolean = false,
+    val appTheme: AppTheme = AppTheme.CAVE
 )
 
 @HiltViewModel
@@ -93,8 +96,18 @@ class CompressorViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            settings.amoledMode.collect { amoled ->
+                _settingsState.update { it.copy(amoledMode = amoled) }
+            }
+        }
+        viewModelScope.launch {
             settings.useDynamicColor.collect { dynamic ->
                 _settingsState.update { it.copy(useDynamicColor = dynamic) }
+            }
+        }
+        viewModelScope.launch {
+            settings.appTheme.collect { theme ->
+                _settingsState.update { it.copy(appTheme = theme) }
             }
         }
     }
@@ -112,8 +125,7 @@ class CompressorViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, result = null) }
-            val result = compressTextUseCase(text)
-            result.fold(
+            compressTextUseCase(text).fold(
                 onSuccess = { compression ->
                     _uiState.update { it.copy(isLoading = false, result = compression) }
                 },
@@ -124,13 +136,8 @@ class CompressorViewModel @Inject constructor(
         }
     }
 
-    fun clearResult() {
-        _uiState.update { it.copy(result = null, error = null) }
-    }
-
-    fun clearInput() {
-        _uiState.update { it.copy(inputText = "", inputTokens = 0, result = null, error = null) }
-    }
+    fun clearResult() { _uiState.update { it.copy(result = null, error = null) } }
+    fun clearInput() { _uiState.update { it.copy(inputText = "", inputTokens = 0, result = null, error = null) } }
 
     fun setProvider(provider: ApiProvider) {
         viewModelScope.launch {
@@ -139,36 +146,20 @@ class CompressorViewModel @Inject constructor(
         }
     }
 
-    fun setModel(model: String) {
-        viewModelScope.launch { settings.setSelectedModel(model) }
-    }
-
-    fun setCompressionLevel(level: CompressionLevel) {
-        viewModelScope.launch { settings.setCompressionLevel(level) }
-    }
-
-    fun setOpenRouterKey(key: String) {
-        viewModelScope.launch { settings.setOpenRouterApiKey(key) }
-    }
-
-    fun setGroqKey(key: String) {
-        viewModelScope.launch { settings.setGroqApiKey(key) }
-    }
-
-    fun setDarkTheme(dark: Boolean) {
-        viewModelScope.launch { settings.setDarkTheme(dark) }
-    }
-
-    fun setDynamicColor(dynamic: Boolean) {
-        viewModelScope.launch { settings.setUseDynamicColor(dynamic) }
-    }
+    fun setModel(model: String) { viewModelScope.launch { settings.setSelectedModel(model) } }
+    fun setCompressionLevel(level: CompressionLevel) { viewModelScope.launch { settings.setCompressionLevel(level) } }
+    fun setOpenRouterKey(key: String) { viewModelScope.launch { settings.setOpenRouterApiKey(key) } }
+    fun setGroqKey(key: String) { viewModelScope.launch { settings.setGroqApiKey(key) } }
+    fun setDarkTheme(dark: Boolean) { viewModelScope.launch { settings.setDarkTheme(dark) } }
+    fun setAmoledMode(amoled: Boolean) { viewModelScope.launch { settings.setAmoledMode(amoled) } }
+    fun setDynamicColor(dynamic: Boolean) { viewModelScope.launch { settings.setUseDynamicColor(dynamic) } }
+    fun setAppTheme(theme: AppTheme) { viewModelScope.launch { settings.setAppTheme(theme) } }
 
     fun fetchModels(provider: ApiProvider? = null) {
-        val targetProvider = provider ?: _settingsState.value.selectedProvider
+        val target = provider ?: _settingsState.value.selectedProvider
         viewModelScope.launch {
             _settingsState.update { it.copy(isLoadingModels = true) }
-            val result = fetchModelsUseCase(targetProvider)
-            result.fold(
+            fetchModelsUseCase(target).fold(
                 onSuccess = { models ->
                     _settingsState.update { it.copy(availableModels = models, isLoadingModels = false) }
                 },
@@ -179,11 +170,6 @@ class CompressorViewModel @Inject constructor(
         }
     }
 
-    fun deleteHistory(id: Long) {
-        viewModelScope.launch { getHistoryUseCase.deleteById(id) }
-    }
-
-    fun clearHistory() {
-        viewModelScope.launch { getHistoryUseCase.clearAll() }
-    }
+    fun deleteHistory(id: Long) { viewModelScope.launch { getHistoryUseCase.deleteById(id) } }
+    fun clearHistory() { viewModelScope.launch { getHistoryUseCase.clearAll() } }
 }

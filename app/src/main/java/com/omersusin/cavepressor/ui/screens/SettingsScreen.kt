@@ -1,10 +1,16 @@
 package com.omersusin.cavepressor.ui.screens
 
+import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +18,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -22,6 +31,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,12 +57,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.omersusin.cavepressor.domain.model.ApiProvider
+import com.omersusin.cavepressor.domain.model.AppTheme
 import com.omersusin.cavepressor.ui.components.ApiKeyDialog
 import com.omersusin.cavepressor.ui.components.ModelSelector
 import com.omersusin.cavepressor.viewmodel.CompressorViewModel
@@ -77,22 +92,15 @@ fun SettingsScreen(
         ApiKeyDialog(
             providerName = "OpenRouter",
             currentKey = settings.openRouterKey,
-            onConfirm = {
-                viewModel.setOpenRouterKey(it)
-                showOpenRouterDialog = false
-            },
+            onConfirm = { viewModel.setOpenRouterKey(it); showOpenRouterDialog = false },
             onDismiss = { showOpenRouterDialog = false }
         )
     }
-
     if (showGroqDialog) {
         ApiKeyDialog(
             providerName = "Groq",
             currentKey = settings.groqKey,
-            onConfirm = {
-                viewModel.setGroqKey(it)
-                showGroqDialog = false
-            },
+            onConfirm = { viewModel.setGroqKey(it); showGroqDialog = false },
             onDismiss = { showGroqDialog = false }
         )
     }
@@ -102,7 +110,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Settings",
+                        "Settings",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
@@ -126,7 +134,73 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            // Provider seçimi
+            // ── Appearance ────────────────────────────────────────────────
+            item {
+                SettingsSectionCard(title = "Appearance", icon = Icons.Default.Palette) {
+
+                    // Dark Mode
+                    SettingsToggleRow(
+                        title = "Dark Mode",
+                        subtitle = "Dark background, light text",
+                        icon = Icons.Default.DarkMode,
+                        checked = settings.darkTheme,
+                        onCheckedChange = { viewModel.setDarkTheme(it) }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // AMOLED Mode
+                    SettingsToggleRow(
+                        title = "AMOLED Mode",
+                        subtitle = "Pure black — saves battery on OLED screens",
+                        icon = Icons.Default.Star,
+                        checked = settings.amoledMode,
+                        enabled = settings.darkTheme,
+                        onCheckedChange = { viewModel.setAmoledMode(it) }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Dynamic Color
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        SettingsToggleRow(
+                            title = "Dynamic Color",
+                            subtitle = "Uses your wallpaper colors (Android 12+)",
+                            icon = Icons.Default.Palette,
+                            checked = settings.useDynamicColor,
+                            onCheckedChange = { viewModel.setDynamicColor(it) }
+                        )
+                        if (settings.useDynamicColor) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "⚡ Restart app to fully apply",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 32.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    // Tema grid — dynamic color kapalıysa göster
+                    if (!settings.useDynamicColor) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Theme Color",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        ThemeColorGrid(
+                            selectedTheme = settings.appTheme,
+                            onThemeSelected = { viewModel.setAppTheme(it) }
+                        )
+                    }
+                }
+            }
+
+            // ── API Provider ──────────────────────────────────────────────
             item {
                 SettingsSectionCard(title = "API Provider", icon = Icons.Default.SmartToy) {
                     Row(
@@ -139,13 +213,7 @@ fun SettingsScreen(
                                 onClick = { viewModel.setProvider(provider) },
                                 label = { Text(provider.displayName) },
                                 leadingIcon = if (settings.selectedProvider == provider) {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                                    { Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
                                 } else null,
                                 modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
@@ -161,12 +229,11 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "API Keys",
+                        "API Keys",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-
                     ApiKeyRow(
                         providerName = "OpenRouter",
                         hasKey = settings.openRouterKey.isNotBlank(),
@@ -181,14 +248,12 @@ fun SettingsScreen(
                 }
             }
 
-            // Model seçimi
+            // ── Model ─────────────────────────────────────────────────────
             item {
                 SettingsSectionCard(title = "Model", icon = Icons.Default.SmartToy) {
-
-                    // Dropdown listeden seç
                     if (settings.availableModels.isNotEmpty()) {
                         Text(
-                            text = "Select from list",
+                            "Select from list",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -203,14 +268,12 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(14.dp))
                     }
 
-                    // Manuel model girişi
                     Text(
-                        text = "Or enter model ID manually",
+                        "Or enter model ID manually",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -222,10 +285,9 @@ fun SettingsScreen(
                             modifier = Modifier.weight(1f),
                             placeholder = {
                                 Text(
-                                    text = when (settings.selectedProvider) {
-                                        ApiProvider.GROQ -> "llama-3.3-70b-versatile"
-                                        ApiProvider.OPENROUTER -> "openai/gpt-4o-mini"
-                                    },
+                                    text = if (settings.selectedProvider == ApiProvider.GROQ)
+                                        "llama-3.3-70b-versatile"
+                                    else "openai/gpt-4o-mini",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             },
@@ -241,39 +303,29 @@ fun SettingsScreen(
                                 }
                             })
                         )
-                        IconButton(
-                            onClick = {
-                                if (customModelInput.isNotBlank()) {
-                                    viewModel.setModel(customModelInput.trim())
-                                    customModelInput = ""
-                                    focusManager.clearFocus()
-                                }
+                        IconButton(onClick = {
+                            if (customModelInput.isNotBlank()) {
+                                viewModel.setModel(customModelInput.trim())
+                                customModelInput = ""
+                                focusManager.clearFocus()
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Apply",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                        }) {
+                            Icon(Icons.Default.Check, contentDescription = "Apply", tint = MaterialTheme.colorScheme.primary)
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Seçili model göster
                     if (settings.selectedModel.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
+                                Icons.Default.Edit, null,
                                 modifier = Modifier.size(12.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "Active: ${settings.selectedModel}",
+                                "Active: ${settings.selectedModel}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -282,20 +334,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Görünüm
-            item {
-                SettingsSectionCard(title = "Appearance", icon = Icons.Default.Palette) {
-                    SettingsToggleRow(
-                        title = "Dark Theme",
-                        subtitle = "Cave-optimized dark palette",
-                        icon = Icons.Default.DarkMode,
-                        checked = settings.darkTheme,
-                        onCheckedChange = { viewModel.setDarkTheme(it) }
-                    )
-                }
-            }
-
-            // Hakkında
+            // ── About ─────────────────────────────────────────────────────
             item {
                 Card(
                     shape = MaterialTheme.shapes.large,
@@ -305,21 +344,17 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "🪨 Cavepressor",
+                            "🪨 Cavepressor",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Semantic compression for LLM contexts.\nBased on Caveman Compression by William Peltomäki.",
+                            "Semantic compression for LLM contexts.\nBased on Caveman Compression by William Peltomäki.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "v1.0.0",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Text("v1.0.0", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -330,30 +365,109 @@ fun SettingsScreen(
 }
 
 @Composable
+private fun ThemeColorGrid(
+    selectedTheme: AppTheme,
+    onThemeSelected: (AppTheme) -> Unit
+) {
+    val themes = AppTheme.entries.filter { it != AppTheme.DYNAMIC }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        userScrollEnabled = false
+    ) {
+        items(themes) { theme ->
+            ThemeColorCard(
+                theme = theme,
+                isSelected = selectedTheme == theme,
+                onClick = { onThemeSelected(theme) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeColorCard(
+    theme: AppTheme,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clip(MaterialTheme.shapes.medium)
+            .background(theme.seed.copy(alpha = 0.15f).compositeOver(MaterialTheme.colorScheme.surface))
+            .border(
+                width = if (isSelected) 2.dp else 0.5.dp,
+                color = if (isSelected) theme.seed else MaterialTheme.colorScheme.outlineVariant,
+                shape = MaterialTheme.shapes.medium
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(if (theme.seed == Color.Transparent) MaterialTheme.colorScheme.primary else theme.seed)
+            ) {
+                if (isSelected) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .align(Alignment.Center),
+                        tint = Color.White
+                    )
+                }
+            }
+            Text(
+                text = theme.displayName,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                color = if (isSelected) theme.seed
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+private fun Color.compositeOver(background: Color): Color {
+    val a = this.alpha
+    return Color(
+        red = this.red * a + background.red * (1 - a),
+        green = this.green * a + background.green * (1 - a),
+        blue = this.blue * a + background.blue * (1 - a),
+        alpha = 1f
+    )
+}
+
+@Composable
 private fun SettingsSectionCard(
     title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     content: @Composable () -> Unit
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Icon(icon, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                 Text(
-                    text = title,
+                    title,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -376,10 +490,7 @@ private fun ApiKeyRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text(
-                text = providerName,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-            )
+            Text(providerName, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
             Text(
                 text = if (hasKey) "Key configured ✓" else "No key set",
                 style = MaterialTheme.typography.labelSmall,
@@ -387,20 +498,10 @@ private fun ApiKeyRow(
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
-        OutlinedButton(
-            onClick = onClick,
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Icon(
-                imageVector = Icons.Default.Key,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp)
-            )
+        OutlinedButton(onClick = onClick, shape = MaterialTheme.shapes.medium) {
+            Icon(Icons.Default.Key, null, modifier = Modifier.size(14.dp))
             Spacer(modifier = Modifier.size(4.dp))
-            Text(
-                text = if (hasKey) "Update" else "Set Key",
-                style = MaterialTheme.typography.labelMedium
-            )
+            Text(if (hasKey) "Update" else "Set Key", style = MaterialTheme.typography.labelMedium)
         }
     }
 }
@@ -409,8 +510,9 @@ private fun ApiKeyRow(
 private fun SettingsToggleRow(
     title: String,
     subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
@@ -424,23 +526,31 @@ private fun SettingsToggleRow(
             modifier = Modifier.weight(1f)
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = null,
+                icon, null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
             )
             Column {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    title,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    color = if (enabled) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
                 Text(
-                    text = subtitle,
+                    subtitle,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = if (enabled) 0.6f else 0.3f
+                    )
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled
+        )
     }
 }
