@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -92,7 +93,7 @@ if (showColorPicker) {
         com.omersusin.cavepressor.ui.components.CustomColorDialog(
             initialColor = androidx.compose.ui.graphics.Color(settings.customColor),
             onColorSelected = { color ->
-                viewModel.setCustomColor(androidx.compose.ui.graphics.toArgb(color))
+                viewModel.setCustomColor(color.toArgb())
                 viewModel.setAppTheme(AppThemeType.CUSTOM)
                 showColorPicker = false
             },
