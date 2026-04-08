@@ -1,0 +1,6 @@
+-keep class com.omersusin.cavepressor.** { *; }
+-keepattributes *Annotation*
+-keep class com.squareup.moshi.** { *; }
+-keep @com.squareup.moshi.JsonClass class * { *; }
+-dontwarn kotlinx.**
+-dontwarn okhttp3.**
