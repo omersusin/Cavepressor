@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Arkaplan — koyu mağara tonu -->
+    <path
+        android:fillColor="#1A1410"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- Mağara kaya silüeti — üst -->
+    <path
+        android:fillColor="#2C2218"
+        android:pathData="M0,0 L20,18 L35,8 L50,22 L65,10 L80,20 L95,6 L108,15 L108,0 Z" />
+
+    <!-- Mağara kaya silüeti — alt -->
+    <path
+        android:fillColor="#2C2218"
+        android:pathData="M0,108 L15,90 L30,100 L48,85 L62,98 L78,82 L92,95 L108,80 L108,108 Z" />
+
+    <!-- Taş/kaya — ana sembol -->
+    <path
+        android:fillColor="#3D2800"
+        android:strokeColor="#D4A843"
+        android:strokeWidth="1.5"
+        android:pathData="M30,65 Q25,45 38,35 Q50,25 65,32 Q80,38 78,55 Q76,70 62,75 Q45,82 30,65 Z" />
+
+    <!-- Parıltı — meşale ışığı efekti -->
+    <path
+        android:fillColor="#D4A843"
+        android:fillAlpha="0.15"
+        android:pathData="M54,30 Q72,28 76,50 Q80,68 60,74 Q72,60 70,48 Q68,36 54,30 Z" />
+
+    <!-- C harfi — Compress sembolü -->
+    <path
+        android:fillColor="#D4A843"
+        android:strokeColor="#D4A843"
+        android:strokeWidth="0.5"
+        android:pathData="M62,42 Q52,38 46,46 Q40,54 44,62 Q48,70 58,70 Q64,70 68,66"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Ok işareti — sıkıştırma sembolü -->
+    <path
+        android:fillColor="#D4A843"
+        android:pathData="M70,48 L76,54 L70,60 L68,58 L72,54 L68,50 Z" />
+
+    <!-- Meşale ışığı parıltısı sol üst -->
+    <path
+        android:fillColor="#D4A843"
+        android:fillAlpha="0.6"
+        android:pathData="M22,22 L25,28 L19,28 Z" />
+    <path
+        android:fillColor="#D4A843"
+        android:fillAlpha="0.4"
+        android:pathData="M22,16 L23,21 L21,21 Z" />
+
+    <!-- Küçük taşlar — dekoratif -->
+    <path
+        android:fillColor="#8C7B6B"
+        android:fillAlpha="0.5"
+        android:pathData="M82,72 Q84,70 86,72 Q88,74 86,76 Q84,78 82,76 Z" />
+    <path
+        android:fillColor="#8C7B6B"
+        android:fillAlpha="0.4"
+        android:pathData="M25,78 Q27,76 29,78 Q30,80 28,81 Q26,82 25,80 Z" />
+</vector>
