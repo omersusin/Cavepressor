@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -31,6 +32,7 @@ class SettingsDataStore @Inject constructor(
         val KEY_APP_THEME = stringPreferencesKey("app_theme")
         val KEY_DARK_THEME = booleanPreferencesKey("dark_theme")
         val KEY_USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
+        val KEY_CUSTOM_COLOR = intPreferencesKey("custom_color")
     }
 
     val openRouterApiKey: Flow<String> = context.dataStore.data
@@ -63,6 +65,9 @@ class SettingsDataStore @Inject constructor(
     val darkTheme: Flow<Boolean> = context.dataStore.data
         .map { it[KEY_DARK_THEME] ?: true }
 
+    val customColor: Flow<Int> = context.dataStore.data
+        .map { it[KEY_CUSTOM_COLOR] ?: android.graphics.Color.GREEN }
+
     val useDynamicColor: Flow<Boolean> = context.dataStore.data
         .map { it[KEY_USE_DYNAMIC_COLOR] ?: false }
 
@@ -88,6 +93,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setAppTheme(theme: AppThemeType) {
         context.dataStore.edit { it[KEY_APP_THEME] = theme.name }
+    }
+
+    suspend fun setCustomColor(color: Int) {
+        context.dataStore.edit { it[KEY_CUSTOM_COLOR] = color }
     }
 
     suspend fun setDarkTheme(dark: Boolean) {

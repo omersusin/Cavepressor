@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +21,9 @@ import com.omersusin.cavepressor.ui.theme.*
 @Composable
 fun ThemeSelectorGrid(
     selectedTheme: AppThemeType,
+    customColor: Color,
     onThemeSelected: (AppThemeType) -> Unit,
+    onCustomThemeEdit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -48,12 +50,19 @@ fun ThemeSelectorGrid(
                     for (theme in rowItems) {
                         ThemeItem(
                             themeType = theme,
+                            customColor = customColor,
                             isSelected = theme == selectedTheme,
-                            onClick = { onThemeSelected(theme) },
+                            onClick = { 
+                                if (theme == AppThemeType.CUSTOM && selectedTheme == theme) {
+                                    onCustomThemeEdit()
+                                } else {
+                                    if (theme == AppThemeType.CUSTOM) onCustomThemeEdit()
+                                    onThemeSelected(theme)
+                                }
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    // Boş kalan alanları doldurmak için spacer
                     repeat(itemsPerRow - rowItems.size) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -66,6 +75,7 @@ fun ThemeSelectorGrid(
 @Composable
 private fun ThemeItem(
     themeType: AppThemeType,
+    customColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -89,31 +99,31 @@ private fun ThemeItem(
                 .then(borderModifier)
                 .clickable { onClick() }
         ) {
+            val colors = getQuadColors(themeType, customColor)
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier.weight(1f)) {
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[0]))
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[1]))
+                }
+                Row(modifier = Modifier.weight(1f)) {
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[2]))
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[3]))
+                }
+            }
             if (themeType == AppThemeType.CUSTOM) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Palette,
                         contentDescription = "Custom Theme",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(32.dp)
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(Color.Black.copy(alpha=0.4f), RoundedCornerShape(8.dp))
+                            .padding(4.dp)
                     )
-                }
-            } else {
-                val colors = getQuadColors(themeType)
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[0]))
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[1]))
-                    }
-                    Row(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[2]))
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(colors[3]))
-                    }
                 }
             }
         }
@@ -130,7 +140,7 @@ private fun ThemeItem(
     }
 }
 
-private fun getQuadColors(themeType: AppThemeType): List<Color> {
+private fun getQuadColors(themeType: AppThemeType, customColor: Color): List<Color> {
     return when (themeType) {
         AppThemeType.CRIMSON -> listOf(CrimsonPrimary, CrimsonSurfaceVariant, CrimsonTertiary, CrimsonBackground)
         AppThemeType.VIOLET -> listOf(VioletPrimary, VioletSurfaceVariant, VioletTertiary, VioletBackground)
@@ -139,6 +149,48 @@ private fun getQuadColors(themeType: AppThemeType): List<Color> {
         AppThemeType.AMBER -> listOf(AmberPrimary, AmberSurfaceVariant, AmberTertiary, AmberBackground)
         AppThemeType.ROSE -> listOf(RosePrimary, RoseSurfaceVariant, RoseTertiary, RoseBackground)
         AppThemeType.MONO -> listOf(MonoPrimary, MonoSurfaceVariant, MonoTertiary, MonoBackground)
-        AppThemeType.CUSTOM -> listOf(Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent)
+        AppThemeType.CUSTOM -> listOf(customColor, customColor.copy(alpha=0.7f), customColor.copy(alpha=0.5f), Color(0xFF333333))
     }
+}
+
+@Composable
+fun CustomColorDialog(
+    initialColor: Color,
+    onColorSelected: (Color) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var red by remember { mutableStateOf(initialColor.red) }
+    var green by remember { mutableStateOf(initialColor.green) }
+    var blue by remember { mutableStateOf(initialColor.blue) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Pick Custom Color") },
+        text = {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(red, green, blue))
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Red", style = MaterialTheme.typography.labelMedium)
+                Slider(value = red, onValueChange = { red = it }, colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red))
+                
+                Text("Green", style = MaterialTheme.typography.labelMedium)
+                Slider(value = green, onValueChange = { green = it },  colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green))
+                
+                Text("Blue", style = MaterialTheme.typography.labelMedium)
+                Slider(value = blue, onValueChange = { blue = it }, colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onColorSelected(Color(red, green, blue)) }) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }

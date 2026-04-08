@@ -15,7 +15,7 @@ enum class AppThemeType {
 }
 
 // Preset Dark Schemes matching the design provided
-private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = darkColorScheme(
+private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean, customColor: Color) = darkColorScheme(
     primary = when (themeType) {
         AppThemeType.CRIMSON -> CrimsonPrimary
         AppThemeType.VIOLET -> VioletPrimary
@@ -24,7 +24,7 @@ private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = dar
         AppThemeType.AMBER -> AmberPrimary
         AppThemeType.ROSE -> RosePrimary
         AppThemeType.MONO -> MonoPrimary
-        AppThemeType.CUSTOM -> CustomPrimary // User's custom settings
+        AppThemeType.CUSTOM -> customColor // User's custom settings
     },
     secondary = when (themeType) {
         AppThemeType.CRIMSON -> CrimsonSecondary
@@ -34,7 +34,7 @@ private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = dar
         AppThemeType.AMBER -> AmberSecondary
         AppThemeType.ROSE -> RoseSecondary
         AppThemeType.MONO -> MonoSecondary
-        AppThemeType.CUSTOM -> CustomPrimary
+        AppThemeType.CUSTOM -> customColor.copy(alpha = 0.7f)
     },
     tertiary = when (themeType) {
         AppThemeType.CRIMSON -> CrimsonTertiary
@@ -44,7 +44,7 @@ private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = dar
         AppThemeType.AMBER -> AmberTertiary
         AppThemeType.ROSE -> RoseTertiary
         AppThemeType.MONO -> MonoTertiary
-        AppThemeType.CUSTOM -> CustomPrimary
+        AppThemeType.CUSTOM -> customColor.copy(alpha = 0.5f)
     },
     background = if (isAmoled) AMOLEDBackground else when (themeType) {
         AppThemeType.CRIMSON -> CrimsonBackground
@@ -74,8 +74,28 @@ private fun getDarkColorScheme(themeType: AppThemeType, isAmoled: Boolean) = dar
         AppThemeType.AMBER -> AmberSurfaceVariant
         AppThemeType.ROSE -> RoseSurfaceVariant
         AppThemeType.MONO -> MonoSurfaceVariant
-        AppThemeType.CUSTOM -> CrimsonSurfaceVariant
+        AppThemeType.CUSTOM -> Color(0xFF333333)
     },
+    error = CommonError,
+    onError = CommonOnError,
+    errorContainer = CommonErrorContainer,
+    onErrorContainer = CommonOnErrorContainer
+)
+
+private fun getLightColorScheme(themeType: AppThemeType, customColor: Color) = lightColorScheme(
+    primary = when (themeType) {
+        AppThemeType.CRIMSON -> CrimsonPrimaryLight
+        AppThemeType.VIOLET -> VioletPrimaryLight
+        AppThemeType.OCEAN -> OceanPrimaryLight
+        AppThemeType.SAGE -> SagePrimaryLight
+        AppThemeType.AMBER -> AmberPrimaryLight
+        AppThemeType.ROSE -> RosePrimaryLight
+        AppThemeType.MONO -> MonoPrimaryLight
+        AppThemeType.CUSTOM -> customColor
+    },
+    background = LightBackground,
+    surface = LightSurface,
+    surfaceVariant = LightSurfaceVariant,
     error = CommonError,
     onError = CommonOnError,
     errorContainer = CommonErrorContainer,
@@ -87,16 +107,18 @@ fun CavepressorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     isAmoledMode: Boolean = false,
-    themeType: AppThemeType = AppThemeType.SAGE, // Defaulting to Sage based on screenshot
+    themeType: AppThemeType = AppThemeType.SAGE,
+    customColorValue: Int = android.graphics.Color.GREEN,
     content: @Composable () -> Unit
 ) {
+    val cColor = Color(customColorValue)
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> getDarkColorScheme(themeType, isAmoledMode)
-        else -> lightColorScheme() // Light mode not required essentially per user reqs, fallback logic
+        darkTheme -> getDarkColorScheme(themeType, isAmoledMode, cColor)
+        else -> getLightColorScheme(themeType, cColor)
     }
 
     MaterialTheme(

@@ -70,6 +70,7 @@ fun SettingsScreen(
     var showGroqDialog by remember { mutableStateOf(false) }
     var customModelInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    var showColorPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(settings.selectedProvider) {
         viewModel.fetchModels(settings.selectedProvider)
@@ -84,6 +85,18 @@ fun SettingsScreen(
                 showOpenRouterDialog = false
             },
             onDismiss = { showOpenRouterDialog = false }
+        )
+    }
+
+if (showColorPicker) {
+        com.omersusin.cavepressor.ui.components.CustomColorDialog(
+            initialColor = androidx.compose.ui.graphics.Color(settings.customColor),
+            onColorSelected = { color ->
+                viewModel.setCustomColor(androidx.compose.ui.graphics.toArgb(color))
+                viewModel.setAppTheme(AppThemeType.CUSTOM)
+                showColorPicker = false
+            },
+            onDismiss = { showColorPicker = false }
         )
     }
 
@@ -301,7 +314,9 @@ fun SettingsScreen(
                     
                     ThemeSelectorGrid(
                         selectedTheme = settings.appTheme,
-                        onThemeSelected = { viewModel.setAppTheme(it) }
+                        customColor = androidx.compose.ui.graphics.Color(settings.customColor),
+                        onThemeSelected = { viewModel.setAppTheme(it) },
+                        onCustomThemeEdit = { showColorPicker = true }
                     )
                 }
             }

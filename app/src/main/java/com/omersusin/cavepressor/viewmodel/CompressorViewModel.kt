@@ -39,7 +39,8 @@ data class SettingsUiState(
     val isLoadingModels: Boolean = false,
     val appTheme: AppThemeType = AppThemeType.SAGE,
     val darkTheme: Boolean = true,
-    val useDynamicColor: Boolean = false
+    val useDynamicColor: Boolean = false,
+    val customColor: Int = android.graphics.Color.GREEN
 )
 
 @HiltViewModel
@@ -87,6 +88,11 @@ class CompressorViewModel @Inject constructor(
         viewModelScope.launch {
             settings.groqApiKey.collect { key ->
                 _settingsState.update { it.copy(groqKey = key) }
+            }
+        }
+        viewModelScope.launch {
+            settings.customColor.collect { color ->
+                _settingsState.update { it.copy(customColor = color) }
             }
         }
         viewModelScope.launch {
@@ -160,6 +166,10 @@ class CompressorViewModel @Inject constructor(
 
     fun setGroqKey(key: String) {
         viewModelScope.launch { settings.setGroqApiKey(key) }
+    }
+
+    fun setCustomColor(color: Int) {
+        viewModelScope.launch { settings.setCustomColor(color) }
     }
 
     fun setAppTheme(theme: AppThemeType) {

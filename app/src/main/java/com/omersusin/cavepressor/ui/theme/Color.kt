@@ -69,3 +69,16 @@ val CommonOnErrorContainer = Color(0xFFF9DEDC)
 
 val AMOLEDBackground = Color(0xFF000000)
 val AMOLEDSurface = Color(0xFF000000)
+
+// Light Theme Colors
+val CrimsonPrimaryLight = Color(0xFFB3261E)
+val VioletPrimaryLight = Color(0xFF6750A4)
+val OceanPrimaryLight = Color(0xFF006874)
+val SagePrimaryLight = Color(0xFF4A635B)
+val AmberPrimaryLight = Color(0xFF7A5900)
+val RosePrimaryLight = Color(0xFF9C4146)
+val MonoPrimaryLight = Color(0xFF5E5E5E)
+
+val LightBackground = Color(0xFFFFFBFE)
+val LightSurface = Color(0xFFFFFBFE)
+val LightSurfaceVariant = Color(0xFFE7E0EC)
