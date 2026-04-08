@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.domain.model
+package com.cavepressor.domain.model
 
 enum class ApiProvider(val displayName: String, val baseUrl: String) {
     OPENROUTER("OpenRouter", "https://openrouter.ai/api/v1/"),

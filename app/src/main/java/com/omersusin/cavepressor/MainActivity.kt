@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor
+package com.cavepressor
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,11 +14,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.omersusin.cavepressor.ui.screens.HistoryScreen
-import com.omersusin.cavepressor.ui.screens.HomeScreen
-import com.omersusin.cavepressor.ui.screens.SettingsScreen
-import com.omersusin.cavepressor.ui.theme.CavepressorTheme
-import com.omersusin.cavepressor.viewmodel.CompressorViewModel
+import com.cavepressor.ui.screens.HistoryScreen
+import com.cavepressor.ui.screens.HomeScreen
+import com.cavepressor.ui.screens.SettingsScreen
+import com.cavepressor.ui.theme.CavepressorTheme
+import com.cavepressor.viewmodel.CompressorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 sealed class Screen(val route: String) {

@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.data.datastore
+package com.cavepressor.data.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -7,8 +7,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.domain.model.CompressionLevel
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.domain.model.CompressionLevel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

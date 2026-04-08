@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.theme
+package com.cavepressor.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

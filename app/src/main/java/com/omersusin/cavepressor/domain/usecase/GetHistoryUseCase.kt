@@ -1,7 +1,7 @@
-package com.omersusin.cavepressor.domain.usecase
+package com.cavepressor.domain.usecase
 
-import com.omersusin.cavepressor.data.repository.CompressionRepository
-import com.omersusin.cavepressor.domain.model.CompressionResult
+import com.cavepressor.data.repository.CompressionRepository
+import com.cavepressor.domain.model.CompressionResult
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

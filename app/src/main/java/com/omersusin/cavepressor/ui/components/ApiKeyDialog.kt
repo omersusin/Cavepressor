@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.components
+package com.cavepressor.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

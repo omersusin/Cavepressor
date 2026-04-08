@@ -1,9 +1,9 @@
-package com.omersusin.cavepressor.domain.usecase
+package com.cavepressor.domain.usecase
 
-import com.omersusin.cavepressor.data.datastore.SettingsDataStore
-import com.omersusin.cavepressor.di.NetworkModule
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.domain.model.CaveModel
+import com.cavepressor.data.datastore.SettingsDataStore
+import com.cavepressor.di.NetworkModule
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.domain.model.CaveModel
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject

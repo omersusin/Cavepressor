@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.screens
+package com.cavepressor.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -51,8 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.omersusin.cavepressor.domain.model.CompressionResult
-import com.omersusin.cavepressor.viewmodel.CompressorViewModel
+import com.cavepressor.domain.model.CompressionResult
+import com.cavepressor.viewmodel.CompressorViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

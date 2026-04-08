@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.components
+package com.cavepressor.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -23,7 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.omersusin.cavepressor.domain.model.CompressionResult
+import com.cavepressor.domain.model.CompressionResult
 
 @Composable
 fun CompressionCard(

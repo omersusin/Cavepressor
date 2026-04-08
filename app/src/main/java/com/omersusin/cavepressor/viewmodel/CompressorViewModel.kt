@@ -1,15 +1,15 @@
-package com.omersusin.cavepressor.viewmodel
+package com.cavepressor.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.omersusin.cavepressor.data.datastore.SettingsDataStore
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.domain.model.CaveModel
-import com.omersusin.cavepressor.domain.model.CompressionLevel
-import com.omersusin.cavepressor.domain.model.CompressionResult
-import com.omersusin.cavepressor.domain.usecase.CompressTextUseCase
-import com.omersusin.cavepressor.domain.usecase.FetchModelsUseCase
-import com.omersusin.cavepressor.domain.usecase.GetHistoryUseCase
+import com.cavepressor.data.datastore.SettingsDataStore
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.domain.model.CaveModel
+import com.cavepressor.domain.model.CompressionLevel
+import com.cavepressor.domain.model.CompressionResult
+import com.cavepressor.domain.usecase.CompressTextUseCase
+import com.cavepressor.domain.usecase.FetchModelsUseCase
+import com.cavepressor.domain.usecase.GetHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

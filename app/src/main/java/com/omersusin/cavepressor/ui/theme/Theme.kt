@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.theme
+package com.cavepressor.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

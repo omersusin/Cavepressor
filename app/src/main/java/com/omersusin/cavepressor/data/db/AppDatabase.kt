@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.data.db
+package com.cavepressor.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

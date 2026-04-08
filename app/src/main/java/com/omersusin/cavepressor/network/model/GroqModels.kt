@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.network.model
+package com.cavepressor.network.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

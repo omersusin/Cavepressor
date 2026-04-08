@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.theme
+package com.cavepressor.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
