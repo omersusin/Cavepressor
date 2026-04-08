@@ -4,9 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Palette
@@ -35,19 +32,32 @@ fun ThemeSelectorGrid(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(AppThemeType.entries) { theme ->
-                ThemeItem(
-                    themeType = theme,
-                    isSelected = theme == selectedTheme,
-                    onClick = { onThemeSelected(theme) }
-                )
+            val itemsPerRow = 4
+            val items = AppThemeType.entries
+            items.chunked(itemsPerRow).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    for (theme in rowItems) {
+                        ThemeItem(
+                            themeType = theme,
+                            isSelected = theme == selectedTheme,
+                            onClick = { onThemeSelected(theme) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    // Boş kalan alanları doldurmak için spacer
+                    repeat(itemsPerRow - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -57,11 +67,12 @@ fun ThemeSelectorGrid(
 private fun ThemeItem(
     themeType: AppThemeType,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         val quadShape = RoundedCornerShape(16.dp)
         val borderModifier = if (isSelected) {
