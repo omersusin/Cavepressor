@@ -1,14 +1,14 @@
 package com.omersusin.cavepressor.ui.screens
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,16 +18,15 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +46,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -58,22 +57,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.omersusin.cavepressor.domain.model.CompressionLevel
+import com.omersusin.cavepressor.domain.model.CompressionResult
 import com.omersusin.cavepressor.ui.components.CompressionCard
 import com.omersusin.cavepressor.ui.components.TokenCounter
 import com.omersusin.cavepressor.viewmodel.CompressorViewModel
 import kotlinx.coroutines.launch
-import android.content.Intent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +85,6 @@ fun HomeScreen(
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -104,10 +101,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "🪨",
-                            fontSize = 22.sp
-                        )
+                        Text(text = "🪨", fontSize = 22.sp)
                         Column {
                             Text(
                                 text = "Cavepressor",
@@ -124,10 +118,12 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    // Ayarlar ikonu — Settings ikonuyla
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "Settings"
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -137,104 +133,106 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(scrollState)
                 .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp)
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Compression Level Segmented
-            CompressionLevelSelector(
-                selected = settingsState.compressionLevel,
-                onSelect = { viewModel.setCompressionLevel(it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Input alanı
-            InputSection(
-                text = uiState.inputText,
-                tokenCount = uiState.inputTokens,
-                onTextChange = { viewModel.onInputChange(it) },
-                onClear = { viewModel.clearInput() }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Compress butonu
-            Button(
-                onClick = { viewModel.compress() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                enabled = !uiState.isLoading && uiState.inputText.isNotBlank(),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+            // Compression Level
+            item {
+                CompressionLevelSelector(
+                    selected = settingsState.compressionLevel,
+                    onSelect = { viewModel.setCompressionLevel(it) }
                 )
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = "Compress",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Input
+            item {
+                InputSection(
+                    text = uiState.inputText,
+                    tokenCount = uiState.inputTokens,
+                    onTextChange = { viewModel.onInputChange(it) },
+                    onClear = { viewModel.clearInput() }
+                )
+            }
 
-            // Sonuç alanı
-            AnimatedVisibility(
-                visible = uiState.result != null,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut() + slideOutVertically { it / 2 }
-            ) {
-                uiState.result?.let { result ->
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        CompressionCard(result = result)
-
-                        // Sıkıştırılmış metin kutusu
-                        CompressedTextBox(
-                            text = result.compressedText,
-                            onCopy = {
-                                clipboard.setText(AnnotatedString(result.compressedText))
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("Copied to clipboard")
-                                }
-                            },
-                            onShare = {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, result.compressedText)
-                                }
-                                context.startActivity(Intent.createChooser(intent, "Share compressed text"))
-                            }
+            // Compress butonu
+            item {
+                Button(
+                    onClick = { viewModel.compress() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    enabled = !uiState.isLoading && uiState.inputText.isNotBlank(),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
                         )
-
-                        // Orijinal metin kutusu (karşılaştırma için)
-                        OriginalTextBox(text = result.originalText)
-
-                        Spacer(modifier = Modifier.height(8.dp))
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = "Compress",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
                 }
             }
+
+            // Sonuç
+            if (uiState.result != null) {
+                item {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn() + slideInVertically { it / 2 },
+                        exit = fadeOut() + slideOutVertically { it / 2 }
+                    ) {
+                        uiState.result?.let { result ->
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                CompressionCard(result = result)
+
+                                CompressedTextBox(
+                                    text = result.compressedText,
+                                    onCopy = {
+                                        clipboard.setText(AnnotatedString(result.compressedText))
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("Copied to clipboard ✓")
+                                        }
+                                    },
+                                    onShare = {
+                                        val intent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, result.compressedText)
+                                        }
+                                        context.startActivity(
+                                            Intent.createChooser(intent, "Share compressed text")
+                                        )
+                                    }
+                                )
+
+                                OriginalTextBox(text = result.originalText)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
@@ -292,9 +290,9 @@ private fun InputSection(
                     .height(180.dp),
                 placeholder = {
                     Text(
-                        text = "Paste your text here...\n\nThe engine will strip grammar, keep facts.",
+                        text = "Paste your text here...\n\nStrip grammar. Keep facts. Save tokens.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -305,8 +303,10 @@ private fun InputSection(
                 ),
                 shape = MaterialTheme.shapes.large,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = FontFamily.Default,
                     lineHeight = 22.sp
+                ),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences
                 )
             )
             Row(
@@ -364,10 +364,10 @@ private fun CompressedTextBox(
                     FilledTonalButton(
                         onClick = onCopy,
                         modifier = Modifier.height(32.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ContentCopy,
+                            Icons.Default.ContentCopy,
                             contentDescription = "Copy",
                             modifier = Modifier.size(14.dp)
                         )
@@ -377,10 +377,10 @@ private fun CompressedTextBox(
                     FilledTonalButton(
                         onClick = onShare,
                         modifier = Modifier.height(32.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Share,
+                            Icons.Default.Share,
                             contentDescription = "Share",
                             modifier = Modifier.size(14.dp)
                         )
