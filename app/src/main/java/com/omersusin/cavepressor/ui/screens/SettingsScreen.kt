@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.screens
+package com.cavepressor.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,10 +52,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.ui.components.ApiKeyDialog
-import com.omersusin.cavepressor.ui.components.ModelSelector
-import com.omersusin.cavepressor.viewmodel.CompressorViewModel
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.ui.components.ApiKeyDialog
+import com.cavepressor.ui.components.ModelSelector
+import com.cavepressor.viewmodel.CompressorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

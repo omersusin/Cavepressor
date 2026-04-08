@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.domain.model
+package com.cavepressor.domain.model
 
 data class CompressionResult(
     val id: Long = 0,

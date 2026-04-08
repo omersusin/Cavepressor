@@ -1,9 +1,9 @@
-package com.omersusin.cavepressor.di
+package com.cavepressor.di
 
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.network.api.GroqApi
-import com.omersusin.cavepressor.network.api.OpenRouterApi
-import com.omersusin.cavepressor.network.interceptor.AuthInterceptor
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.network.api.GroqApi
+import com.cavepressor.network.api.OpenRouterApi
+import com.cavepressor.network.interceptor.AuthInterceptor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module

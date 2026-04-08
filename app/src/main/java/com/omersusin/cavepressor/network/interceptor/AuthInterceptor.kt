@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.network.interceptor
+package com.cavepressor.network.interceptor
 
 import okhttp3.Interceptor
 import okhttp3.Response

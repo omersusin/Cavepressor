@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.components
+package com.cavepressor.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntAsState

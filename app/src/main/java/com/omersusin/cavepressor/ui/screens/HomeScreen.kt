@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.screens
+package com.cavepressor.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -68,10 +68,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.omersusin.cavepressor.domain.model.CompressionLevel
-import com.omersusin.cavepressor.ui.components.CompressionCard
-import com.omersusin.cavepressor.ui.components.TokenCounter
-import com.omersusin.cavepressor.viewmodel.CompressorViewModel
+import com.cavepressor.domain.model.CompressionLevel
+import com.cavepressor.ui.components.CompressionCard
+import com.cavepressor.ui.components.TokenCounter
+import com.cavepressor.viewmodel.CompressorViewModel
 import kotlinx.coroutines.launch
 import android.content.Intent
 

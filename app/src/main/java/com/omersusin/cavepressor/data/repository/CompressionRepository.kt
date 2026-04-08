@@ -1,10 +1,10 @@
-package com.omersusin.cavepressor.data.repository
+package com.cavepressor.data.repository
 
-import com.omersusin.cavepressor.data.db.CompressionDao
-import com.omersusin.cavepressor.data.db.CompressionEntity
-import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.domain.model.CompressionLevel
-import com.omersusin.cavepressor.domain.model.CompressionResult
+import com.cavepressor.data.db.CompressionDao
+import com.cavepressor.data.db.CompressionEntity
+import com.cavepressor.domain.model.ApiProvider
+import com.cavepressor.domain.model.CompressionLevel
+import com.cavepressor.domain.model.CompressionResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

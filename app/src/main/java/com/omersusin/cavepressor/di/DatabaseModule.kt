@@ -1,9 +1,9 @@
-package com.omersusin.cavepressor.di
+package com.cavepressor.di
 
 import android.content.Context
 import androidx.room.Room
-import com.omersusin.cavepressor.data.db.AppDatabase
-import com.omersusin.cavepressor.data.db.CompressionDao
+import com.cavepressor.data.db.AppDatabase
+import com.cavepressor.data.db.CompressionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

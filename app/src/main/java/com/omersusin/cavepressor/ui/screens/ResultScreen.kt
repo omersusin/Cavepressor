@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor.ui.screens
+package com.cavepressor.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.omersusin.cavepressor.domain.model.CompressionResult
-import com.omersusin.cavepressor.ui.components.CompressionCard
+import com.cavepressor.domain.model.CompressionResult
+import com.cavepressor.ui.components.CompressionCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

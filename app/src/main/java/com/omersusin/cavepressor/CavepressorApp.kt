@@ -1,4 +1,4 @@
-package com.omersusin.cavepressor
+package com.cavepressor
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
