@@ -55,6 +55,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.omersusin.cavepressor.domain.model.ApiProvider
 import com.omersusin.cavepressor.ui.components.ApiKeyDialog
 import com.omersusin.cavepressor.ui.components.ModelSelector
+import com.omersusin.cavepressor.ui.components.ThemeSelectorGrid
+import com.omersusin.cavepressor.ui.theme.AppThemeType
 import com.omersusin.cavepressor.viewmodel.CompressorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +69,7 @@ fun SettingsScreen(
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
     var customModelInput by remember { mutableStateOf("") }
+    var activeTheme by remember { mutableStateOf(AppThemeType.SAGE) }
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(settings.selectedProvider) {
@@ -291,6 +294,15 @@ fun SettingsScreen(
                         icon = Icons.Default.DarkMode,
                         checked = settings.darkTheme,
                         onCheckedChange = { viewModel.setDarkTheme(it) }
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    ThemeSelectorGrid(
+                        selectedTheme = activeTheme,
+                        onThemeSelected = { activeTheme = it }
                     )
                 }
             }
