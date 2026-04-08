@@ -4,7 +4,6 @@ import com.omersusin.cavepressor.data.datastore.SettingsDataStore
 import com.omersusin.cavepressor.data.repository.CompressionRepository
 import com.omersusin.cavepressor.di.NetworkModule
 import com.omersusin.cavepressor.domain.model.ApiProvider
-import com.omersusin.cavepressor.domain.model.CaveModel
 import com.omersusin.cavepressor.domain.model.CompressionLevel
 import com.omersusin.cavepressor.domain.model.CompressionResult
 import com.omersusin.cavepressor.network.model.ChatMessage
@@ -29,41 +28,55 @@ class CompressTextUseCase @Inject constructor(
             }
 
             if (apiKey.isBlank()) {
-                return Result.failure(Exception("API key not set for ${provider.displayName}"))
+                return Result.failure(Exception("API key not set for ${provider.displayName}. Go to Settings."))
             }
 
-            val systemPrompt = buildSystemPrompt(level)
-            val request = ChatRequest(
-                model = model,
-                messages = listOf(
-                    ChatMessage(role = "system", content = systemPrompt),
-                    ChatMessage(role = "user", content = text)
+            if (model.isBlank()) {
+                return Result.failure(Exception("No model selected. Go to Settings."))
+            }
+
+            val messages = listOf(
+                ChatMessage(
+                    role = "system",
+                    content = buildSystemPrompt(level)
+                ),
+                ChatMessage(
+                    role = "user",
+                    content = text.trim()
                 )
             )
 
-            val response = when (provider) {
+            val request = ChatRequest(
+                model = model.trim(),
+                messages = messages,
+                temperature = 0.3,
+                maxTokens = 2048
+            )
+
+            val responseText = when (provider) {
                 ApiProvider.OPENROUTER -> {
-                    val api = NetworkModule.buildOpenRouterApi(apiKey, moshi)
-                    api.compress(request)
+                    val api = NetworkModule.buildOpenRouterApi(apiKey.trim(), moshi)
+                    val response = api.compress(request)
+                    response.choices.firstOrNull()?.message?.content
+                        ?: return Result.failure(Exception("Empty response from OpenRouter"))
                 }
                 ApiProvider.GROQ -> {
-                    val api = NetworkModule.buildGroqApi(apiKey, moshi)
-                    api.compress(request)
+                    val api = NetworkModule.buildGroqApi(apiKey.trim(), moshi)
+                    val response = api.compress(request)
+                    response.choices.firstOrNull()?.message?.content
+                        ?: return Result.failure(Exception("Empty response from Groq"))
                 }
             }
 
-            val compressedText = response.choices.firstOrNull()?.message?.content
-                ?: return Result.failure(Exception("Empty response from API"))
-
             val originalTokens = estimateTokens(text)
-            val compressedTokens = estimateTokens(compressedText)
+            val compressedTokens = estimateTokens(responseText)
             val reduction = if (originalTokens > 0) {
-                ((originalTokens - compressedTokens) * 100 / originalTokens).coerceAtLeast(0)
+                ((originalTokens - compressedTokens) * 100 / originalTokens).coerceIn(0, 99)
             } else 0
 
             val result = CompressionResult(
                 originalText = text,
-                compressedText = compressedText,
+                compressedText = responseText,
                 originalTokens = originalTokens,
                 compressedTokens = compressedTokens,
                 reductionPercent = reduction,
@@ -75,61 +88,44 @@ class CompressTextUseCase @Inject constructor(
             val savedId = repository.save(result)
             Result.success(result.copy(id = savedId))
 
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string() ?: "No error body"
+            Result.failure(Exception("HTTP ${e.code()}: $errorBody"))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.message ?: "Unknown error"))
         }
     }
 
     private fun buildSystemPrompt(level: CompressionLevel): String {
-        val intensity = when (level) {
-            CompressionLevel.LIGHT -> """
-                Apply LIGHT caveman compression (target 15-30% reduction):
-                - Remove only obvious filler words (very, quite, essentially, basically)
-                - Remove articles (a, an, the) where meaning is preserved
-                - Keep most conjunctions and sentence structure intact
-                - Preserve all facts, numbers, names, technical terms
-            """.trimIndent()
+        return when (level) {
+            CompressionLevel.LIGHT ->
+                "You are a text compression assistant. Apply light compression (15-30% reduction). " +
+                "Remove filler words (very, quite, basically, essentially), unnecessary articles (a, an, the) where meaning is clear. " +
+                "Keep sentence structure mostly intact. Preserve ALL facts: numbers, names, dates, technical terms. " +
+                "Output ONLY the compressed text, nothing else."
 
-            CompressionLevel.MEDIUM -> """
-                Apply MEDIUM caveman compression (target 30-45% reduction):
-                - Remove articles (a, an, the), filler words
-                - Remove weak conjunctions (however, therefore, because, in order to)
-                - Convert passive voice to active voice
-                - Keep 2-5 words per sentence, one atomic thought per sentence
-                - Use action verbs: do, make, fix, check, use
-                - Preserve ALL facts: numbers, names, dates, technical terms, constraints
-            """.trimIndent()
+            CompressionLevel.MEDIUM ->
+                "You are a Caveman Compression engine. Apply medium compression (30-45% reduction). " +
+                "Rules: Remove articles (a, an, the). Remove weak conjunctions (however, therefore, because, in order to). " +
+                "Convert passive to active voice. Use short sentences, one idea per sentence. " +
+                "Use action verbs: do, make, fix, check, use. " +
+                "PRESERVE: all numbers, names, dates, technical terms, constraints, specific details. " +
+                "Output ONLY the compressed text, nothing else."
 
-            CompressionLevel.AGGRESSIVE -> """
-                Apply AGGRESSIVE caveman compression (target 45-60% reduction):
-                - Strip all grammar: articles, conjunctions, prepositions
-                - Remove all passive constructions
-                - Maximum 3 words per sentence
-                - Telegram-style: only nouns, verbs, critical adjectives
-                - Use symbols where possible: → instead of "leads to", & instead of "and"
-                - MUST preserve: numbers, proper nouns, technical terms, constraints
-                - No filler, no decoration, pure information density
-            """.trimIndent()
+            CompressionLevel.AGGRESSIVE ->
+                "You are a Caveman Compression engine. Apply aggressive compression (45-60% reduction). " +
+                "Rules: Strip all grammar — articles, conjunctions, prepositions. No passive voice. " +
+                "Maximum 4 words per sentence. Telegram style: nouns + verbs + critical adjectives only. " +
+                "Use symbols: → instead of leads to, & instead of and, w/ instead of with. " +
+                "MUST preserve: numbers, proper nouns, technical terms, constraints. " +
+                "Output ONLY the compressed text, nothing else."
         }
-
-        return """
-            You are a Caveman Compression engine. Your job is to compress text while preserving all semantic meaning and facts.
-            
-            Core rules:
-            1. Strip grammar, keep facts
-            2. Remove only what LLMs can reliably reconstruct
-            3. Never remove: numbers, names, dates, technical terms, specific constraints
-            4. Output ONLY the compressed text, no explanations, no preamble
-            
-            $intensity
-        """.trimIndent()
     }
 
     fun estimateTokens(text: String): Int {
         if (text.isBlank()) return 0
-        // GPT-2 tokenizer yaklaşımı: ortalama 4 karakter = 1 token
-        val byWhitespace = text.trim().split(Regex("\\s+")).size
-        val byChars = text.length / 4
-        return ((byWhitespace + byChars) / 2).coerceAtLeast(1)
+        val words = text.trim().split(Regex("\\s+")).size
+        val chars = text.length / 4
+        return ((words + chars) / 2).coerceAtLeast(1)
     }
 }

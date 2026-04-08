@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SmartToy
@@ -29,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -43,7 +47,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.omersusin.cavepressor.domain.model.ApiProvider
@@ -60,6 +66,8 @@ fun SettingsScreen(
     val settings by viewModel.settingsState.collectAsState()
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
+    var customModelInput by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(settings.selectedProvider) {
         viewModel.fetchModels(settings.selectedProvider)
@@ -117,9 +125,10 @@ fun SettingsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            // Provider seçimi
             item {
                 SettingsSectionCard(title = "API Provider", icon = Icons.Default.SmartToy) {
-                    // Provider seçimi
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -130,7 +139,13 @@ fun SettingsScreen(
                                 onClick = { viewModel.setProvider(provider) },
                                 label = { Text(provider.displayName) },
                                 leadingIcon = if (settings.selectedProvider == provider) {
-                                    { Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
+                                    {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 } else null,
                                 modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
@@ -145,7 +160,6 @@ fun SettingsScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // API Key butonları
                     Text(
                         text = "API Keys",
                         style = MaterialTheme.typography.labelLarge,
@@ -156,37 +170,119 @@ fun SettingsScreen(
                     ApiKeyRow(
                         providerName = "OpenRouter",
                         hasKey = settings.openRouterKey.isNotBlank(),
-                        isActive = settings.selectedProvider == ApiProvider.OPENROUTER,
                         onClick = { showOpenRouterDialog = true }
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     ApiKeyRow(
                         providerName = "Groq",
                         hasKey = settings.groqKey.isNotBlank(),
-                        isActive = settings.selectedProvider == ApiProvider.GROQ,
                         onClick = { showGroqDialog = true }
                     )
                 }
             }
 
+            // Model seçimi
             item {
                 SettingsSectionCard(title = "Model", icon = Icons.Default.SmartToy) {
+
+                    // Dropdown listeden seç
                     if (settings.availableModels.isNotEmpty()) {
+                        Text(
+                            text = "Select from list",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
                         ModelSelector(
                             models = settings.availableModels,
                             selectedModelId = settings.selectedModel,
                             onModelSelected = { viewModel.setModel(it) }
                         )
-                    } else {
-                        Text(
-                            text = "Set an API key to load models",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        Spacer(modifier = Modifier.height(14.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                    // Manuel model girişi
+                    Text(
+                        text = "Or enter model ID manually",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = customModelInput,
+                            onValueChange = { customModelInput = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = {
+                                Text(
+                                    text = when (settings.selectedProvider) {
+                                        ApiProvider.GROQ -> "llama-3.3-70b-versatile"
+                                        ApiProvider.OPENROUTER -> "openai/gpt-4o-mini"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            },
+                            singleLine = true,
+                            shape = MaterialTheme.shapes.medium,
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = {
+                                if (customModelInput.isNotBlank()) {
+                                    viewModel.setModel(customModelInput.trim())
+                                    customModelInput = ""
+                                    focusManager.clearFocus()
+                                }
+                            })
                         )
+                        IconButton(
+                            onClick = {
+                                if (customModelInput.isNotBlank()) {
+                                    viewModel.setModel(customModelInput.trim())
+                                    customModelInput = ""
+                                    focusManager.clearFocus()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Apply",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Seçili model göster
+                    if (settings.selectedModel.isNotBlank()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Active: ${settings.selectedModel}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
 
+            // Görünüm
             item {
                 SettingsSectionCard(title = "Appearance", icon = Icons.Default.Palette) {
                     SettingsToggleRow(
@@ -199,8 +295,8 @@ fun SettingsScreen(
                 }
             }
 
+            // Hakkında
             item {
-                // Hakkında kartı
                 Card(
                     shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(
@@ -272,7 +368,6 @@ private fun SettingsSectionCard(
 private fun ApiKeyRow(
     providerName: String,
     hasKey: Boolean,
-    isActive: Boolean,
     onClick: () -> Unit
 ) {
     Row(
@@ -302,7 +397,10 @@ private fun ApiKeyRow(
                 modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.size(4.dp))
-            Text(if (hasKey) "Update" else "Set Key", style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = if (hasKey) "Update" else "Set Key",
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     }
 }
