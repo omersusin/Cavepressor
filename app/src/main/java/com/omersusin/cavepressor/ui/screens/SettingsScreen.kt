@@ -444,3 +444,4 @@ private fun SettingsToggleRow(
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
+
