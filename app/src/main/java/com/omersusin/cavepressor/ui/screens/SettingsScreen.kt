@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,9 +17,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -180,22 +176,6 @@ fun SettingsScreen(
                             )
                         }
                         Spacer(modifier = Modifier.height(10.dp))
-                    }
-
-                    // Tema grid — dynamic color kapalıysa göster
-                    if (!settings.useDynamicColor) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Theme Color",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        ThemeColorGrid(
-                            selectedTheme = settings.appTheme,
-                            onThemeSelected = { viewModel.setAppTheme(it) }
-                        )
                     }
                 }
             }
@@ -364,81 +344,7 @@ fun SettingsScreen(
     }
 }
 
-@Composable
-private fun ThemeColorGrid(
-    selectedTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit
-) {
-    val themes = AppTheme.entries.filter { it != AppTheme.DYNAMIC }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        userScrollEnabled = false
-    ) {
-        items(themes) { theme ->
-            ThemeColorCard(
-                theme = theme,
-                isSelected = selectedTheme == theme,
-                onClick = { onThemeSelected(theme) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun ThemeColorCard(
-    theme: AppTheme,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clip(MaterialTheme.shapes.medium)
-            .background(theme.seed.copy(alpha = 0.15f).compositeOver(MaterialTheme.colorScheme.surface))
-            .border(
-                width = if (isSelected) 2.dp else 0.5.dp,
-                color = if (isSelected) theme.seed else MaterialTheme.colorScheme.outlineVariant,
-                shape = MaterialTheme.shapes.medium
-            )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .background(if (theme.seed == Color.Transparent) MaterialTheme.colorScheme.primary else theme.seed)
-            ) {
-                if (isSelected) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .align(Alignment.Center),
-                        tint = Color.White
-                    )
-                }
-            }
-            Text(
-                text = theme.displayName,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                color = if (isSelected) theme.seed
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
-        }
-    }
-}
 
 private fun Color.compositeOver(background: Color): Color {
     val a = this.alpha
