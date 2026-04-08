@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.omersusin.cavepressor"
+    namespace = "com.cavepressor"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.omersusin.cavepressor"
+        applicationId = "com.cavepressor"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
