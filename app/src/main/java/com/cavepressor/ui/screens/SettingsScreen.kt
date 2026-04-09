@@ -155,7 +155,7 @@ if (showColorPicker) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -611,8 +611,7 @@ private fun ApiKeyRow(
             }
         }
         OutlinedButton(
-            onClick = onClick,
-            shape = MaterialTheme.shapes.medium
+            onClick = onClick
         ) {
             Icon(
                 imageVector = Icons.Default.Key,
