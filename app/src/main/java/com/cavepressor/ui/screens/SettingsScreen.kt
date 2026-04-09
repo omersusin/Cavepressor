@@ -84,6 +84,10 @@ fun SettingsScreen(
     val focusManager = LocalFocusManager.current
     var showColorPicker by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.checkLocalModelStatus("gemma-2b-it-cpu-int4.bin")
+    }
+
     LaunchedEffect(settings.selectedProvider) {
         viewModel.fetchModels(settings.selectedProvider)
     }
@@ -207,10 +211,78 @@ if (showColorPicker) {
                     if (settings.engineType == EngineType.LOCAL_LLM) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            "Experimental: Runs an AI model locally using your phone's memory. No internet required. Download manager coming soon.",
+                            text = "Experimental: Runs an AI model locally using your phone's memory. No internet required.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                                Text("Gemma 2B (INT4 CPU)", fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("~1.4 GB model file from Google", style = MaterialTheme.typography.labelSmall)
+                                
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                val dlState = settings.localModelDownloadState
+                                when (dlState) {
+                                    is com.cavepressor.domain.usecase.DownloadState.Idle -> {
+                                        androidx.compose.material3.OutlinedButton(
+                                            onClick = {
+                                                viewModel.downloadLocalModel(
+                                                    "https://storage.googleapis.com/mediapipe-tasks/genai/gemma-2b-it-cpu-int4.bin",
+                                                    "gemma-2b-it-cpu-int4.bin"
+                                                )
+                                            },
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("Download Model")
+                                        }
+                                    }
+                                    is com.cavepressor.domain.usecase.DownloadState.Downloading -> {
+                                        Column(modifier = Modifier.fillMaxWidth()) {
+                                            Text("Downloading... ${dlState.progress}%", style = MaterialTheme.typography.labelSmall)
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            androidx.compose.material3.LinearProgressIndicator(
+                                                progress = { dlState.progress / 100f },
+                                                modifier = Modifier.fillMaxWidth().height(6.dp),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                    is com.cavepressor.domain.usecase.DownloadState.Success -> {
+                                        Text(
+                                            "✓ Downloaded & Ready to Compress",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    is com.cavepressor.domain.usecase.DownloadState.Error -> {
+                                        Text(
+                                            "Error: ${dlState.message}",
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        androidx.compose.material3.OutlinedButton(
+                                            onClick = {
+                                                viewModel.downloadLocalModel(
+                                                    "https://storage.googleapis.com/mediapipe-tasks/genai/gemma-2b-it-cpu-int4.bin",
+                                                    "gemma-2b-it-cpu-int4.bin"
+                                                )
+                                            },
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("Retry Download")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -288,6 +360,20 @@ if (showColorPicker) {
                         iconRes = com.cavepressor.R.drawable.ic_huggingface,
                         onClick = { showHfDialog = true }
                     )
+                    
+                    if (settings.selectedProvider == ApiProvider.HUGGING_FACE) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f))
+                        ) {
+                            Text(
+                                text = "Tip: You can use free serverless inference on Hugging Face! Get your free Access Token from huggingface.co/settings/tokens.\nNote: Free tier models might sleep and need a few seconds to wake up.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    }
                 }
             }
 

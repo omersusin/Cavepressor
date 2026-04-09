@@ -8,6 +8,8 @@ import com.cavepressor.domain.model.CaveModel
 import com.cavepressor.domain.model.CompressionLevel
 import com.cavepressor.domain.model.CompressionResult
 import com.cavepressor.domain.usecase.CompressTextUseCase
+import com.cavepressor.domain.usecase.DownloadLocalModelUseCase
+import com.cavepressor.domain.usecase.DownloadState
 import com.cavepressor.domain.usecase.FetchModelsUseCase
 import com.cavepressor.domain.usecase.GetHistoryUseCase
 import com.cavepressor.ui.theme.AppThemeType
@@ -43,7 +45,8 @@ data class SettingsUiState(
     val darkTheme: Boolean = true,
     val useDynamicColor: Boolean = false,
     val customColor: Int = android.graphics.Color.GREEN,
-    val engineType: EngineType = EngineType.CLOUD_LLM
+    val engineType: EngineType = EngineType.CLOUD_LLM,
+    val localModelDownloadState: DownloadState = DownloadState.Idle
 )
 
 @HiltViewModel
@@ -51,6 +54,7 @@ class CompressorViewModel @Inject constructor(
     private val compressTextUseCase: CompressTextUseCase,
     private val fetchModelsUseCase: FetchModelsUseCase,
     private val getHistoryUseCase: GetHistoryUseCase,
+    private val downloadLocalModelUseCase: DownloadLocalModelUseCase,
     private val settings: SettingsDataStore
 ) : ViewModel() {
 
@@ -213,6 +217,22 @@ class CompressorViewModel @Inject constructor(
                     _settingsState.update { it.copy(isLoadingModels = false) }
                 }
             )
+        }
+    }
+
+    fun downloadLocalModel(url: String, filename: String) {
+        viewModelScope.launch {
+            downloadLocalModelUseCase(url, filename).collect { state ->
+                _settingsState.update { it.copy(localModelDownloadState = state) }
+            }
+        }
+    }
+
+    fun checkLocalModelStatus(filename: String) {
+        if (downloadLocalModelUseCase.isModelDownloaded(filename)) {
+            _settingsState.update { it.copy(localModelDownloadState = DownloadState.Success) }
+        } else {
+            _settingsState.update { it.copy(localModelDownloadState = DownloadState.Idle) }
         }
     }
 

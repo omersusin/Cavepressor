@@ -28,8 +28,7 @@ class CompressTextUseCase @Inject constructor(
             val level = settings.compressionLevel.first()
             
             if (engineType == EngineType.LOCAL_LLM) {
-                // Determine model file - assuming fixed for now, e.g., "gemma-2b-it-cpu-int4.bin"
-                val modelFileName = "gemma-2b-it-gpu-int4.bin"
+                val modelFileName = "gemma-2b-it-cpu-int4.bin"
                 
                 val initResult = localLlmService.initialize(modelFileName)
                 if (initResult.isFailure) {
