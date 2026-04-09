@@ -4,3 +4,4 @@
 -keep @com.squareup.moshi.JsonClass class * { *; }
 -dontwarn kotlinx.**
 -dontwarn okhttp3.**
+-dontwarn javax.lang.model.**
