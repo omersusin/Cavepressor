@@ -27,6 +27,7 @@ class SettingsDataStore @Inject constructor(
         val KEY_SELECTED_PROVIDER = stringPreferencesKey("selected_provider")
         val KEY_SELECTED_MODEL = stringPreferencesKey("selected_model")
         val KEY_COMPRESSION_LEVEL = stringPreferencesKey("compression_level")
+        val KEY_HF_API_KEY = stringPreferencesKey("hf_api_key")
         val KEY_DARK_THEME = booleanPreferencesKey("dark_theme")
         val KEY_USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
     }
@@ -36,6 +37,9 @@ class SettingsDataStore @Inject constructor(
 
     val groqApiKey: Flow<String> = context.dataStore.data
         .map { it[KEY_GROQ_API_KEY] ?: "" }
+
+    val huggingFaceApiKey: Flow<String> = context.dataStore.data
+        .map { it[KEY_HF_API_KEY] ?: "" }
 
     val selectedProvider: Flow<ApiProvider> = context.dataStore.data
         .map {
@@ -64,6 +68,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setGroqApiKey(key: String) {
         context.dataStore.edit { it[KEY_GROQ_API_KEY] = key }
+    }
+
+    suspend fun setHuggingFaceApiKey(key: String) {
+        context.dataStore.edit { it[KEY_HF_API_KEY] = key }
     }
 
     suspend fun setSelectedProvider(provider: ApiProvider) {

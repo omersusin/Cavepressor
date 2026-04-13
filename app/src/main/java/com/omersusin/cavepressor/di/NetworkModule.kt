@@ -2,6 +2,7 @@ package com.cavepressor.di
 
 import com.cavepressor.domain.model.ApiProvider
 import com.cavepressor.network.api.GroqApi
+import com.cavepressor.network.api.HuggingFaceApi
 import com.cavepressor.network.api.OpenRouterApi
 import com.cavepressor.network.interceptor.AuthInterceptor
 import com.squareup.moshi.Moshi
@@ -56,4 +57,12 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(GroqApi::class.java)
+
+    fun buildHuggingFaceApi(apiKey: String, moshi: Moshi): HuggingFaceApi =
+        Retrofit.Builder()
+            .baseUrl(ApiProvider.HUGGING_FACE.baseUrl)
+            .client(buildOkHttpClient(apiKey))
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(HuggingFaceApi::class.java)
 }

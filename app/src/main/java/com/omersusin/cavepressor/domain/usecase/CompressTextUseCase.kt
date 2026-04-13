@@ -3,6 +3,7 @@ package com.cavepressor.domain.usecase
 import com.cavepressor.data.datastore.SettingsDataStore
 import com.cavepressor.data.repository.CompressionRepository
 import com.cavepressor.di.NetworkModule
+import com.cavepressor.network.api.HuggingFaceApi
 import com.cavepressor.domain.model.ApiProvider
 import com.cavepressor.domain.model.CompressionLevel
 import com.cavepressor.domain.model.CompressionResult
@@ -25,6 +26,7 @@ class CompressTextUseCase @Inject constructor(
             val apiKey = when (provider) {
                 ApiProvider.OPENROUTER -> settings.openRouterApiKey.first()
                 ApiProvider.GROQ -> settings.groqApiKey.first()
+                ApiProvider.HUGGING_FACE -> settings.huggingFaceApiKey.first()
             }
 
             if (apiKey.isBlank()) {
@@ -65,6 +67,12 @@ class CompressTextUseCase @Inject constructor(
                     val response = api.compress(request)
                     response.choices.firstOrNull()?.message?.content
                         ?: return Result.failure(Exception("Empty response from Groq"))
+                }
+                ApiProvider.HUGGING_FACE -> {
+                    val api = NetworkModule.buildHuggingFaceApi(apiKey.trim(), moshi)
+                    val response = api.compress(request)
+                    response.choices.firstOrNull()?.message?.content
+                        ?: return Result.failure(Exception("Empty response from Hugging Face"))
                 }
             }
 

@@ -66,6 +66,7 @@ fun SettingsScreen(
     val settings by viewModel.settingsState.collectAsState()
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
+    var showHuggingFaceDialog by remember { mutableStateOf(false) }
     var customModelInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -94,6 +95,18 @@ fun SettingsScreen(
                 showGroqDialog = false
             },
             onDismiss = { showGroqDialog = false }
+        )
+    }
+
+    if (showHuggingFaceDialog) {
+        ApiKeyDialog(
+            providerName = "Hugging Face",
+            currentKey = settings.huggingFaceKey,
+            onConfirm = {
+                viewModel.setHuggingFaceKey(it)
+                showHuggingFaceDialog = false
+            },
+            onDismiss = { showHuggingFaceDialog = false }
         )
     }
 
@@ -178,6 +191,12 @@ fun SettingsScreen(
                         hasKey = settings.groqKey.isNotBlank(),
                         onClick = { showGroqDialog = true }
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ApiKeyRow(
+                        providerName = "Hugging Face",
+                        hasKey = settings.huggingFaceKey.isNotBlank(),
+                        onClick = { showHuggingFaceDialog = true }
+                    )
                 }
             }
 
@@ -225,6 +244,7 @@ fun SettingsScreen(
                                     text = when (settings.selectedProvider) {
                                         ApiProvider.GROQ -> "llama-3.3-70b-versatile"
                                         ApiProvider.OPENROUTER -> "openai/gpt-4o-mini"
+                                        ApiProvider.HUGGING_FACE -> "meta-llama/Llama-3.1-8B-Instruct"
                                     },
                                     style = MaterialTheme.typography.bodySmall
                                 )

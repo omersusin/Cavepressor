@@ -23,6 +23,20 @@ class FetchModelsUseCase @Inject constructor(
         CaveModel("gemma-7b-it", "Gemma 7B", ApiProvider.GROQ)
     )
 
+    private val huggingFaceModels = listOf(
+        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "Llama 3.1 8B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.3-70B-Instruct", "Llama 3.3 70B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("mistralai/Mistral-7B-Instruct-v0.3", "Mistral 7B Instruct v0.3", ApiProvider.HUGGING_FACE),
+        CaveModel("mistralai/Mixtral-8x7B-Instruct-v0.1", "Mixtral 8x7B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-72B-Instruct", "Qwen2.5 72B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen2.5 7B Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("google/gemma-2-9b-it", "Gemma 2 9B IT", ApiProvider.HUGGING_FACE),
+        CaveModel("google/gemma-2-27b-it", "Gemma 2 27B IT", ApiProvider.HUGGING_FACE),
+        CaveModel("microsoft/Phi-3.5-mini-instruct", "Phi-3.5 Mini Instruct", ApiProvider.HUGGING_FACE),
+        CaveModel("deepseek-ai/DeepSeek-R1-Distill-Qwen-14B", "DeepSeek R1 14B", ApiProvider.HUGGING_FACE),
+        CaveModel("HuggingFaceH4/zephyr-7b-beta", "Zephyr 7B Beta", ApiProvider.HUGGING_FACE)
+    )
+
     private val openRouterModels = listOf(
         CaveModel("openai/gpt-4o-mini", "GPT-4o Mini", ApiProvider.OPENROUTER),
         CaveModel("openai/gpt-4o", "GPT-4o", ApiProvider.OPENROUTER),
@@ -45,6 +59,7 @@ class FetchModelsUseCase @Inject constructor(
         return try {
             when (provider) {
                 ApiProvider.GROQ -> Result.success(groqModels)
+                ApiProvider.HUGGING_FACE -> Result.success(huggingFaceModels)
                 ApiProvider.OPENROUTER -> {
                     val apiKey = settings.openRouterApiKey.first()
                     if (apiKey.isBlank()) {
