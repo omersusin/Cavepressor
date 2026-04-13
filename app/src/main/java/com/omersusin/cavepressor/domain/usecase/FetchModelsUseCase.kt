@@ -21,15 +21,9 @@ class FetchModelsUseCase @Inject constructor(
         CaveModel("mixtral-8x7b-32768", "Mixtral 8x7B", ApiProvider.GROQ),
         CaveModel("gemma2-9b-it", "Gemma 2 9B", ApiProvider.GROQ),
         CaveModel("gemma-7b-it", "Gemma 7B", ApiProvider.GROQ)
-    )
-
-    // Free: works with free HF token via router auto-provider
-    // Paid: requires HF PRO subscription
-    // Only models confirmed working with HF Inference Router
-    // Requires: huggingface.co/settings/inference-providers -> enable Cerebras or Novita
-    private val huggingFaceModels = listOf(
-        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "Llama 3.1 8B ✓", ApiProvider.HUGGING_FACE),
-        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B ✓", ApiProvider.HUGGING_FACE),
+    )    private val huggingFaceModels = listOf(
+        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "Llama 3.1 8B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B", ApiProvider.HUGGING_FACE),
         CaveModel("Qwen/Qwen2.5-14B-Instruct", "Qwen 2.5 14B", ApiProvider.HUGGING_FACE),
         CaveModel("Qwen/Qwen2.5-32B-Instruct", "Qwen 2.5 32B", ApiProvider.HUGGING_FACE),
         CaveModel("meta-llama/Llama-3.1-70B-Instruct", "Llama 3.1 70B", ApiProvider.HUGGING_FACE),
