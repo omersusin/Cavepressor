@@ -3,6 +3,7 @@ package com.cavepressor.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,7 +58,7 @@ import com.cavepressor.ui.components.ApiKeyDialog
 import com.cavepressor.ui.components.ModelSelector
 import com.cavepressor.viewmodel.CompressorViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: CompressorViewModel = hiltViewModel(),
@@ -142,9 +143,10 @@ fun SettingsScreen(
             // Provider seçimi
             item {
                 SettingsSectionCard(title = "API Provider", icon = Icons.Default.SmartToy) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         ApiProvider.entries.forEach { provider ->
                             FilterChip(
@@ -160,7 +162,6 @@ fun SettingsScreen(
                                         )
                                     }
                                 } else null,
-                                modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                     selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -179,6 +180,20 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    if (settings.selectedProvider == ApiProvider.HUGGING_FACE) {
+                        Text(
+                            text = "Token: huggingface.co/settings/tokens",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "[Free] modeller ucretsiz, [Pro] icin HF Pro aboneligi gerekir",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
 
                     ApiKeyRow(
                         providerName = "OpenRouter",
