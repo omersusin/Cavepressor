@@ -72,7 +72,28 @@ class FetchModelsUseCase @Inject constructor(
         return try {
             when (provider) {
                 ApiProvider.GROQ -> Result.success(groqModels)
-                ApiProvider.HUGGING_FACE -> Result.success(huggingFaceModels)
+                ApiProvider.HUGGING_FACE -> {
+                    val apiKey = settings.huggingFaceApiKey.first()
+                    if (apiKey.isBlank()) return Result.success(huggingFaceModels)
+                    try {
+                        val api = NetworkModule.buildHuggingFaceApi(apiKey.trim(), moshi)
+                        val response = api.getModels()
+                        val fetched = response.data
+                            .filter { model ->
+                                // Sadece text-generation uyumlu modelleri filtrele
+                                listOf(
+                                    "llama", "qwen", "mistral", "gemma", "deepseek",
+                                    "phi", "falcon", "bloom", "opt", "gpt", "command",
+                                    "mixtral", "zephyr", "vicuna", "alpaca"
+                                ).any { model.id.contains(it, ignoreCase = true) }
+                            }
+                            .map { CaveModel(it.id, it.id.substringAfterLast("/"), ApiProvider.HUGGING_FACE) }
+                        if (fetched.isEmpty()) Result.success(huggingFaceModels)
+                        else Result.success(fetched)
+                    } catch (e: Exception) {
+                        Result.success(huggingFaceModels)
+                    }
+                }
                 ApiProvider.OPENROUTER -> {
                     val apiKey = settings.openRouterApiKey.first()
                     if (apiKey.isBlank()) {
