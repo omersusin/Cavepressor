@@ -106,39 +106,25 @@ fun SettingsScreen(
 
     // Provider info dialog
     infoProvider?.let { provider ->
+        val providerInfo = when (provider) {
+            ApiProvider.OPENROUTER ->
+                "OpenRouter routes to GPT-4o, Claude, Gemini and more.\n\nAPI Key: openrouter.ai/keys\nFree tier available with rate limits."
+            ApiProvider.GROQ ->
+                "Groq provides ultra-fast inference for open models.\n\nAPI Key: console.groq.com/keys\nFree: 30 req/min, 6000 req/day."
+            ApiProvider.HUGGING_FACE ->
+                "HF Router gives access to thousands of open models.\n\nAPI Key: huggingface.co/settings/tokens\nToken type: Fine-grained\nRequired: Inference > Make calls to Inference Providers\n\n[Free] models work on free accounts. [Paid] require HF PRO."
+        }
         AlertDialog(
             onDismissRequest = { infoProvider = null },
             title = { Text(provider.displayName) },
-            text = {
-                val info = when (provider) {
-                    ApiProvider.OPENROUTER ->
-                        "OpenRouter routes to GPT-4o, Claude, Gemini and more.
-
-API Key: openrouter.ai/keys
-Free tier available with rate limits."
-                    ApiProvider.GROQ ->
-                        "Groq provides ultra-fast inference for open models.
-
-API Key: console.groq.com/keys
-Free: 30 req/min, 6000 req/day."
-                    ApiProvider.HUGGING_FACE ->
-                        "HF Router gives access to thousands of open models.
-
-API Key: huggingface.co/settings/tokens
-Token type: Fine-grained
-Required permission: Inference > Make calls to Inference Providers
-
-[Free] models work on free accounts. [Paid] require HF PRO."
-                }
-                Text(text = info, style = MaterialTheme.typography.bodySmall)
-            },
+            text = { Text(text = providerInfo, style = MaterialTheme.typography.bodySmall) },
             confirmButton = {
                 TextButton(onClick = { infoProvider = null }) { Text("Got it") }
             }
         )
     }
 
-    if (showHuggingFaceDialog) {
+        if (showHuggingFaceDialog) {
         ApiKeyDialog(
             providerName = "Hugging Face",
             currentKey = settings.huggingFaceKey,
