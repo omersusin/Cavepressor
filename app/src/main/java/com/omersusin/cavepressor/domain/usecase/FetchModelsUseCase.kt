@@ -25,8 +25,18 @@ class FetchModelsUseCase @Inject constructor(
 
     // Free: works with free HF token via router auto-provider
     // Paid: requires HF PRO subscription
+    // Only models confirmed working with HF Inference Router
+    // Requires: huggingface.co/settings/inference-providers -> enable Cerebras or Novita
     private val huggingFaceModels = listOf(
-        CaveModel("meta-llama/Llama-3.2-1B-Instruct", "[Free] Llama 3.2 1B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "Llama 3.1 8B ✓", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B ✓", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-14B-Instruct", "Qwen 2.5 14B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-32B-Instruct", "Qwen 2.5 32B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.1-70B-Instruct", "Llama 3.1 70B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.3-70B-Instruct", "[Paid] Llama 3.3 70B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-72B-Instruct", "[Paid] Qwen 2.5 72B", ApiProvider.HUGGING_FACE),
+        CaveModel("deepseek-ai/DeepSeek-R1", "[Paid] DeepSeek R1", ApiProvider.HUGGING_FACE)
+    ),
         CaveModel("meta-llama/Llama-3.2-3B-Instruct", "[Free] Llama 3.2 3B", ApiProvider.HUGGING_FACE),
         CaveModel("Qwen/Qwen2.5-7B-Instruct", "[Free] Qwen2.5 7B", ApiProvider.HUGGING_FACE),
         CaveModel("microsoft/Phi-3.5-mini-instruct", "[Free] Phi-3.5 Mini", ApiProvider.HUGGING_FACE),

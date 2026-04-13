@@ -105,21 +105,19 @@ class CompressTextUseCase @Inject constructor(
     }
 
     private fun buildSystemPrompt(level: CompressionLevel): String {
-        val intensity = when (level) {
-            CompressionLevel.LIGHT -> """Lightly compress the text. Remove only redundant filler words and minor repetitions. Keep about 70-85% of the original length. Preserve all key details."""
-            CompressionLevel.MEDIUM -> """Moderately compress the text. Remove redundant phrases, filler words, and non-essential details. Keep about 55-70% of the original length. Preserve main points."""
-            CompressionLevel.AGGRESSIVE -> """Aggressively compress the text to its absolute core meaning. Use telegram-style shorthand, remove all fluff. Keep only 40-55% of the original length."""
+        val targetRatio = when (level) {
+            CompressionLevel.LIGHT -> "Shorten to 70-85% of original length."
+            CompressionLevel.MEDIUM -> "Shorten to 55-70% of original length."
+            CompressionLevel.AGGRESSIVE -> "Shorten to 40-55% of original length. Use dense, telegram-style prose."
         }
-        return """You are a text compression engine. Compress the following text according to the instruction below.
+        return """You are a text summarization tool. Summarize the input text.
 
-CRITICAL RULES - follow exactly:
-1. Output ONLY the compressed text. No explanations, no labels, no commentary.
-2. Keep the EXACT SAME LANGUAGE as the input. If input is Turkish, output Turkish. If input is English, output English. NEVER translate.
-3. Do NOT start with phrases like "Here is", "Compressed:", "Result:" etc.
-4. Do NOT add arrows (→), translations, or glossaries.
-5. Preserve the meaning and tone of the original.
-
-Compression instruction: $intensity"""
+Rules (mandatory):
+- Output the summarized text ONLY. No preamble, no labels.
+- Use the same language as the input text.
+- $targetRatio
+- Remove filler, repetition, and redundant phrases.
+- Do NOT refuse, do NOT explain. Just output the summary."""
     }
 
     fun estimateTokens(text: String): Int {
