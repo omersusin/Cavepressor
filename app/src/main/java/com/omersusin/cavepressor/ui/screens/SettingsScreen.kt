@@ -3,6 +3,7 @@ package com.cavepressor.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +20,15 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,7 +62,7 @@ import com.cavepressor.ui.components.ApiKeyDialog
 import com.cavepressor.ui.components.ModelSelector
 import com.cavepressor.viewmodel.CompressorViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: CompressorViewModel = hiltViewModel(),
@@ -66,6 +71,8 @@ fun SettingsScreen(
     val settings by viewModel.settingsState.collectAsState()
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
+    var showHuggingFaceDialog by remember { mutableStateOf(false) }
+    var infoProvider by remember { mutableStateOf<ApiProvider?>(null) }
     var customModelInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -94,6 +101,38 @@ fun SettingsScreen(
                 showGroqDialog = false
             },
             onDismiss = { showGroqDialog = false }
+        )
+    }
+
+    // Provider info dialog
+    infoProvider?.let { provider ->
+        val providerInfo = when (provider) {
+            ApiProvider.OPENROUTER ->
+                "OpenRouter routes to GPT-4o, Claude, Gemini and more.\n\nAPI Key: openrouter.ai/keys\nFree tier available with rate limits."
+            ApiProvider.GROQ ->
+                "Groq provides ultra-fast inference for open models.\n\nAPI Key: console.groq.com/keys\nFree: 30 req/min, 6000 req/day."
+            ApiProvider.HUGGING_FACE ->
+                "HF Router gives access to thousands of open models.\n\nAPI Key: huggingface.co/settings/tokens\nToken type: Fine-grained\nRequired: Inference > Make calls to Inference Providers\n\n[Free] models work on free accounts. [Paid] require HF PRO."
+        }
+        AlertDialog(
+            onDismissRequest = { infoProvider = null },
+            title = { Text(provider.displayName) },
+            text = { Text(text = providerInfo, style = MaterialTheme.typography.bodySmall) },
+            confirmButton = {
+                TextButton(onClick = { infoProvider = null }) { Text("Got it") }
+            }
+        )
+    }
+
+        if (showHuggingFaceDialog) {
+        ApiKeyDialog(
+            providerName = "Hugging Face",
+            currentKey = settings.huggingFaceKey,
+            onConfirm = {
+                viewModel.setHuggingFaceKey(it)
+                showHuggingFaceDialog = false
+            },
+            onDismiss = { showHuggingFaceDialog = false }
         )
     }
 
@@ -129,30 +168,45 @@ fun SettingsScreen(
             // Provider seçimi
             item {
                 SettingsSectionCard(title = "API Provider", icon = Icons.Default.SmartToy) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         ApiProvider.entries.forEach { provider ->
-                            FilterChip(
-                                selected = settings.selectedProvider == provider,
-                                onClick = { viewModel.setProvider(provider) },
-                                label = { Text(provider.displayName) },
-                                leadingIcon = if (settings.selectedProvider == provider) {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                } else null,
-                                modifier = Modifier.weight(1f),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                FilterChip(
+                                    selected = settings.selectedProvider == provider,
+                                    onClick = { viewModel.setProvider(provider) },
+                                    label = { Text(provider.displayName) },
+                                    leadingIcon = if (settings.selectedProvider == provider) {
+                                        {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    } else null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = { infoProvider = provider },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Info,
+                                        contentDescription = "Info",
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -167,6 +221,15 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    if (settings.selectedProvider == ApiProvider.HUGGING_FACE) {
+                        Text(
+                            text = "Tap ⓘ next to a provider for setup instructions",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
                     ApiKeyRow(
                         providerName = "OpenRouter",
                         hasKey = settings.openRouterKey.isNotBlank(),
@@ -177,6 +240,12 @@ fun SettingsScreen(
                         providerName = "Groq",
                         hasKey = settings.groqKey.isNotBlank(),
                         onClick = { showGroqDialog = true }
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ApiKeyRow(
+                        providerName = "Hugging Face",
+                        hasKey = settings.huggingFaceKey.isNotBlank(),
+                        onClick = { showHuggingFaceDialog = true }
                     )
                 }
             }
@@ -225,6 +294,7 @@ fun SettingsScreen(
                                     text = when (settings.selectedProvider) {
                                         ApiProvider.GROQ -> "llama-3.3-70b-versatile"
                                         ApiProvider.OPENROUTER -> "openai/gpt-4o-mini"
+                                        ApiProvider.HUGGING_FACE -> "meta-llama/Llama-3.1-8B-Instruct"
                                     },
                                     style = MaterialTheme.typography.bodySmall
                                 )

@@ -34,6 +34,7 @@ data class SettingsUiState(
     val compressionLevel: CompressionLevel = CompressionLevel.MEDIUM,
     val openRouterKey: String = "",
     val groqKey: String = "",
+    val huggingFaceKey: String = "",
     val availableModels: List<CaveModel> = emptyList(),
     val isLoadingModels: Boolean = false,
     val darkTheme: Boolean = true,
@@ -85,6 +86,11 @@ class CompressorViewModel @Inject constructor(
         viewModelScope.launch {
             settings.groqApiKey.collect { key ->
                 _settingsState.update { it.copy(groqKey = key) }
+            }
+        }
+        viewModelScope.launch {
+            settings.huggingFaceApiKey.collect { key ->
+                _settingsState.update { it.copy(huggingFaceKey = key) }
             }
         }
         viewModelScope.launch {
@@ -153,6 +159,10 @@ class CompressorViewModel @Inject constructor(
 
     fun setGroqKey(key: String) {
         viewModelScope.launch { settings.setGroqApiKey(key) }
+    }
+
+    fun setHuggingFaceKey(key: String) {
+        viewModelScope.launch { settings.setHuggingFaceApiKey(key) }
     }
 
     fun setDarkTheme(dark: Boolean) {

@@ -21,6 +21,27 @@ class FetchModelsUseCase @Inject constructor(
         CaveModel("mixtral-8x7b-32768", "Mixtral 8x7B", ApiProvider.GROQ),
         CaveModel("gemma2-9b-it", "Gemma 2 9B", ApiProvider.GROQ),
         CaveModel("gemma-7b-it", "Gemma 7B", ApiProvider.GROQ)
+    )    private val huggingFaceModels = listOf(
+        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "Llama 3.1 8B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-14B-Instruct", "Qwen 2.5 14B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-32B-Instruct", "Qwen 2.5 32B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.1-70B-Instruct", "Llama 3.1 70B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.3-70B-Instruct", "[Paid] Llama 3.3 70B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-72B-Instruct", "[Paid] Qwen 2.5 72B", ApiProvider.HUGGING_FACE),
+        CaveModel("deepseek-ai/DeepSeek-R1", "[Paid] DeepSeek R1", ApiProvider.HUGGING_FACE)
+    ),
+        CaveModel("meta-llama/Llama-3.2-3B-Instruct", "[Free] Llama 3.2 3B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-7B-Instruct", "[Free] Qwen2.5 7B", ApiProvider.HUGGING_FACE),
+        CaveModel("microsoft/Phi-3.5-mini-instruct", "[Free] Phi-3.5 Mini", ApiProvider.HUGGING_FACE),
+        CaveModel("HuggingFaceH4/zephyr-7b-beta", "[Free] Zephyr 7B", ApiProvider.HUGGING_FACE),
+        CaveModel("google/gemma-2-2b-it", "[Free] Gemma 2 2B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-1.5B-Instruct", "[Free] Qwen2.5 1.5B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.1-8B-Instruct", "[Free] Llama 3.1 8B", ApiProvider.HUGGING_FACE),
+        CaveModel("meta-llama/Llama-3.3-70B-Instruct", "[Paid] Llama 3.3 70B", ApiProvider.HUGGING_FACE),
+        CaveModel("Qwen/Qwen2.5-72B-Instruct", "[Paid] Qwen2.5 72B", ApiProvider.HUGGING_FACE),
+        CaveModel("deepseek-ai/DeepSeek-R1", "[Paid] DeepSeek R1", ApiProvider.HUGGING_FACE),
+        CaveModel("google/gemma-2-9b-it", "[Paid] Gemma 2 9B", ApiProvider.HUGGING_FACE)
     )
 
     private val openRouterModels = listOf(
@@ -45,6 +66,28 @@ class FetchModelsUseCase @Inject constructor(
         return try {
             when (provider) {
                 ApiProvider.GROQ -> Result.success(groqModels)
+                ApiProvider.HUGGING_FACE -> {
+                    val apiKey = settings.huggingFaceApiKey.first()
+                    if (apiKey.isBlank()) return Result.success(huggingFaceModels)
+                    try {
+                        val api = NetworkModule.buildHuggingFaceApi(apiKey.trim(), moshi)
+                        val response = api.getModels()
+                        val fetched = response.data
+                            .filter { model ->
+                                // Sadece text-generation uyumlu modelleri filtrele
+                                listOf(
+                                    "llama", "qwen", "mistral", "gemma", "deepseek",
+                                    "phi", "falcon", "bloom", "opt", "gpt", "command",
+                                    "mixtral", "zephyr", "vicuna", "alpaca"
+                                ).any { model.id.contains(it, ignoreCase = true) }
+                            }
+                            .map { CaveModel(it.id, it.id.substringAfterLast("/"), ApiProvider.HUGGING_FACE) }
+                        if (fetched.isEmpty()) Result.success(huggingFaceModels)
+                        else Result.success(fetched)
+                    } catch (e: Exception) {
+                        Result.success(huggingFaceModels)
+                    }
+                }
                 ApiProvider.OPENROUTER -> {
                     val apiKey = settings.openRouterApiKey.first()
                     if (apiKey.isBlank()) {

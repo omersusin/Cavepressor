@@ -3,6 +3,7 @@ package com.cavepressor.domain.usecase
 import com.cavepressor.data.datastore.SettingsDataStore
 import com.cavepressor.data.repository.CompressionRepository
 import com.cavepressor.di.NetworkModule
+import com.cavepressor.network.api.HuggingFaceApi
 import com.cavepressor.domain.model.ApiProvider
 import com.cavepressor.domain.model.CompressionLevel
 import com.cavepressor.domain.model.CompressionResult
@@ -25,6 +26,7 @@ class CompressTextUseCase @Inject constructor(
             val apiKey = when (provider) {
                 ApiProvider.OPENROUTER -> settings.openRouterApiKey.first()
                 ApiProvider.GROQ -> settings.groqApiKey.first()
+                ApiProvider.HUGGING_FACE -> settings.huggingFaceApiKey.first()
             }
 
             if (apiKey.isBlank()) {
@@ -66,12 +68,18 @@ class CompressTextUseCase @Inject constructor(
                     response.choices.firstOrNull()?.message?.content
                         ?: return Result.failure(Exception("Empty response from Groq"))
                 }
+                ApiProvider.HUGGING_FACE -> {
+                    val api = NetworkModule.buildHuggingFaceApi(apiKey.trim(), moshi)
+                    val response = api.compress(request)
+                    response.choices.firstOrNull()?.message?.content
+                        ?: return Result.failure(Exception("Empty response from Hugging Face"))
+                }
             }
 
             val originalTokens = estimateTokens(text)
             val compressedTokens = estimateTokens(responseText)
             val reduction = if (originalTokens > 0) {
-                ((originalTokens - compressedTokens) * 100 / originalTokens).coerceIn(0, 99)
+                if (originalTokens > 0) ((originalTokens - compressedTokens) * 100 / originalTokens) else 0
             } else 0
 
             val result = CompressionResult(
@@ -97,29 +105,19 @@ class CompressTextUseCase @Inject constructor(
     }
 
     private fun buildSystemPrompt(level: CompressionLevel): String {
-        return when (level) {
-            CompressionLevel.LIGHT ->
-                "You are a text compression assistant. Apply light compression (15-30% reduction). " +
-                "Remove filler words (very, quite, basically, essentially), unnecessary articles (a, an, the) where meaning is clear. " +
-                "Keep sentence structure mostly intact. Preserve ALL facts: numbers, names, dates, technical terms. " +
-                "Output ONLY the compressed text, nothing else."
-
-            CompressionLevel.MEDIUM ->
-                "You are a Caveman Compression engine. Apply medium compression (30-45% reduction). " +
-                "Rules: Remove articles (a, an, the). Remove weak conjunctions (however, therefore, because, in order to). " +
-                "Convert passive to active voice. Use short sentences, one idea per sentence. " +
-                "Use action verbs: do, make, fix, check, use. " +
-                "PRESERVE: all numbers, names, dates, technical terms, constraints, specific details. " +
-                "Output ONLY the compressed text, nothing else."
-
-            CompressionLevel.AGGRESSIVE ->
-                "You are a Caveman Compression engine. Apply aggressive compression (45-60% reduction). " +
-                "Rules: Strip all grammar — articles, conjunctions, prepositions. No passive voice. " +
-                "Maximum 4 words per sentence. Telegram style: nouns + verbs + critical adjectives only. " +
-                "Use symbols: → instead of leads to, & instead of and, w/ instead of with. " +
-                "MUST preserve: numbers, proper nouns, technical terms, constraints. " +
-                "Output ONLY the compressed text, nothing else."
+        val targetRatio = when (level) {
+            CompressionLevel.LIGHT -> "Shorten to 70-85% of original length."
+            CompressionLevel.MEDIUM -> "Shorten to 55-70% of original length."
+            CompressionLevel.AGGRESSIVE -> "Shorten to 40-55% of original length. Use dense, telegram-style prose."
         }
+        return """You are a text summarization tool. Summarize the input text.
+
+Rules (mandatory):
+- Output the summarized text ONLY. No preamble, no labels.
+- Use the same language as the input text.
+- $targetRatio
+- Remove filler, repetition, and redundant phrases.
+- Do NOT refuse, do NOT explain. Just output the summary."""
     }
 
     fun estimateTokens(text: String): Int {
