@@ -112,17 +112,25 @@ fun SettingsScreen(
             text = {
                 Text(
                     text = when (provider) {
-                        ApiProvider.OPENROUTER -> "OpenRouter routes requests to GPT-4o, Claude, Gemini, and more.\n\n"
-                            + "API Key: openrouter.ai/keys\nFree tier available with rate limits."
-                        ApiProvider.GROQ -> "Groq provides ultra-fast inference for open-source models.\n\n"
-                            + "API Key: console.groq.com/keys\nFree tier: 30 req/min, 6000 req/day."
-                        ApiProvider.HUGGING_FACE -> "Hugging Face Router gives access to thousands of open models.\n\n"
-                            + "API Key: huggingface.co/settings/tokens\n"
-                            + "Token type: Fine-grained\n"
-                            + "Required permission: Inference > Make calls to Inference Providers\n\n"
-                            + "[Free] models work on free accounts.\n"
-                            + "[Paid] models require HF PRO subscription."
-                    },
+                                ApiProvider.OPENROUTER ->
+                                    "OpenRouter routes to GPT-4o, Claude, Gemini and more.
+
+API Key: openrouter.ai/keys
+Free tier available with rate limits."
+                                ApiProvider.GROQ ->
+                                    "Groq provides ultra-fast inference for open models.
+
+API Key: console.groq.com/keys
+Free: 30 req/min, 6000 req/day."
+                                ApiProvider.HUGGING_FACE ->
+                                    "HF Router gives access to thousands of open models.
+
+API Key: huggingface.co/settings/tokens
+Token type: Fine-grained
+Required: Inference > Make calls to Inference Providers
+
+[Free] models work on free accounts. [Paid] require HF PRO."
+                            },
                     style = MaterialTheme.typography.bodySmall
                 )
             },
