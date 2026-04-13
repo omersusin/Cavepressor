@@ -28,7 +28,6 @@ class FetchModelsUseCase @Inject constructor(
     private val huggingFaceModels = listOf(
         CaveModel("meta-llama/Llama-3.2-1B-Instruct", "[Free] Llama 3.2 1B", ApiProvider.HUGGING_FACE),
         CaveModel("meta-llama/Llama-3.2-3B-Instruct", "[Free] Llama 3.2 3B", ApiProvider.HUGGING_FACE),
-        CaveModel("mistralai/Mistral-7B-Instruct-v0.3", "[Free] Mistral 7B v0.3", ApiProvider.HUGGING_FACE),
         CaveModel("Qwen/Qwen2.5-7B-Instruct", "[Free] Qwen2.5 7B", ApiProvider.HUGGING_FACE),
         CaveModel("microsoft/Phi-3.5-mini-instruct", "[Free] Phi-3.5 Mini", ApiProvider.HUGGING_FACE),
         CaveModel("HuggingFaceH4/zephyr-7b-beta", "[Free] Zephyr 7B", ApiProvider.HUGGING_FACE),

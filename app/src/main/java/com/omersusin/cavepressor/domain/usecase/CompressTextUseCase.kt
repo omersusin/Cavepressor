@@ -79,7 +79,7 @@ class CompressTextUseCase @Inject constructor(
             val originalTokens = estimateTokens(text)
             val compressedTokens = estimateTokens(responseText)
             val reduction = if (originalTokens > 0) {
-                ((originalTokens - compressedTokens) * 100 / originalTokens).coerceIn(0, 99)
+                if (originalTokens > 0) ((originalTokens - compressedTokens) * 100 / originalTokens) else 0
             } else 0
 
             val result = CompressionResult(
@@ -105,29 +105,21 @@ class CompressTextUseCase @Inject constructor(
     }
 
     private fun buildSystemPrompt(level: CompressionLevel): String {
-        return when (level) {
-            CompressionLevel.LIGHT ->
-                "You are a text compression assistant. Apply light compression (15-30% reduction). " +
-                "Remove filler words (very, quite, basically, essentially), unnecessary articles (a, an, the) where meaning is clear. " +
-                "Keep sentence structure mostly intact. Preserve ALL facts: numbers, names, dates, technical terms. " +
-                "Output ONLY the compressed text, nothing else."
-
-            CompressionLevel.MEDIUM ->
-                "You are a Caveman Compression engine. Apply medium compression (30-45% reduction). " +
-                "Rules: Remove articles (a, an, the). Remove weak conjunctions (however, therefore, because, in order to). " +
-                "Convert passive to active voice. Use short sentences, one idea per sentence. " +
-                "Use action verbs: do, make, fix, check, use. " +
-                "PRESERVE: all numbers, names, dates, technical terms, constraints, specific details. " +
-                "Output ONLY the compressed text, nothing else."
-
-            CompressionLevel.AGGRESSIVE ->
-                "You are a Caveman Compression engine. Apply aggressive compression (45-60% reduction). " +
-                "Rules: Strip all grammar — articles, conjunctions, prepositions. No passive voice. " +
-                "Maximum 4 words per sentence. Telegram style: nouns + verbs + critical adjectives only. " +
-                "Use symbols: → instead of leads to, & instead of and, w/ instead of with. " +
-                "MUST preserve: numbers, proper nouns, technical terms, constraints. " +
-                "Output ONLY the compressed text, nothing else."
+        val intensity = when (level) {
+            CompressionLevel.LIGHT -> """Lightly compress the text. Remove only redundant filler words and minor repetitions. Keep about 70-85% of the original length. Preserve all key details."""
+            CompressionLevel.MEDIUM -> """Moderately compress the text. Remove redundant phrases, filler words, and non-essential details. Keep about 55-70% of the original length. Preserve main points."""
+            CompressionLevel.AGGRESSIVE -> """Aggressively compress the text to its absolute core meaning. Use telegram-style shorthand, remove all fluff. Keep only 40-55% of the original length."""
         }
+        return """You are a text compression engine. Compress the following text according to the instruction below.
+
+CRITICAL RULES - follow exactly:
+1. Output ONLY the compressed text. No explanations, no labels, no commentary.
+2. Keep the EXACT SAME LANGUAGE as the input. If input is Turkish, output Turkish. If input is English, output English. NEVER translate.
+3. Do NOT start with phrases like "Here is", "Compressed:", "Result:" etc.
+4. Do NOT add arrows (→), translations, or glossaries.
+5. Preserve the meaning and tone of the original.
+
+Compression instruction: $intensity"""
     }
 
     fun estimateTokens(text: String): Int {
