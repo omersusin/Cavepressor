@@ -110,29 +110,27 @@ fun SettingsScreen(
             onDismissRequest = { infoProvider = null },
             title = { Text(provider.displayName) },
             text = {
-                Text(
-                    text = when (provider) {
-                                ApiProvider.OPENROUTER ->
-                                    "OpenRouter routes to GPT-4o, Claude, Gemini and more.
+                val info = when (provider) {
+                    ApiProvider.OPENROUTER ->
+                        "OpenRouter routes to GPT-4o, Claude, Gemini and more.
 
 API Key: openrouter.ai/keys
 Free tier available with rate limits."
-                                ApiProvider.GROQ ->
-                                    "Groq provides ultra-fast inference for open models.
+                    ApiProvider.GROQ ->
+                        "Groq provides ultra-fast inference for open models.
 
 API Key: console.groq.com/keys
 Free: 30 req/min, 6000 req/day."
-                                ApiProvider.HUGGING_FACE ->
-                                    "HF Router gives access to thousands of open models.
+                    ApiProvider.HUGGING_FACE ->
+                        "HF Router gives access to thousands of open models.
 
 API Key: huggingface.co/settings/tokens
 Token type: Fine-grained
-Required: Inference > Make calls to Inference Providers
+Required permission: Inference > Make calls to Inference Providers
 
 [Free] models work on free accounts. [Paid] require HF PRO."
-                            },
-                    style = MaterialTheme.typography.bodySmall
-                )
+                }
+                Text(text = info, style = MaterialTheme.typography.bodySmall)
             },
             confirmButton = {
                 TextButton(onClick = { infoProvider = null }) { Text("Got it") }
