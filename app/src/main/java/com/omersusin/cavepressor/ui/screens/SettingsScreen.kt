@@ -20,12 +20,15 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -68,6 +72,7 @@ fun SettingsScreen(
     var showOpenRouterDialog by remember { mutableStateOf(false) }
     var showGroqDialog by remember { mutableStateOf(false) }
     var showHuggingFaceDialog by remember { mutableStateOf(false) }
+    var infoProvider by remember { mutableStateOf<ApiProvider?>(null) }
     var customModelInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -96,6 +101,34 @@ fun SettingsScreen(
                 showGroqDialog = false
             },
             onDismiss = { showGroqDialog = false }
+        )
+    }
+
+    // Provider info dialog
+    infoProvider?.let { provider ->
+        AlertDialog(
+            onDismissRequest = { infoProvider = null },
+            title = { Text(provider.displayName) },
+            text = {
+                Text(
+                    text = when (provider) {
+                        ApiProvider.OPENROUTER -> "OpenRouter routes requests to GPT-4o, Claude, Gemini, and more.\n\n"
+                            + "API Key: openrouter.ai/keys\nFree tier available with rate limits."
+                        ApiProvider.GROQ -> "Groq provides ultra-fast inference for open-source models.\n\n"
+                            + "API Key: console.groq.com/keys\nFree tier: 30 req/min, 6000 req/day."
+                        ApiProvider.HUGGING_FACE -> "Hugging Face Router gives access to thousands of open models.\n\n"
+                            + "API Key: huggingface.co/settings/tokens\n"
+                            + "Token type: Fine-grained\n"
+                            + "Required permission: Inference > Make calls to Inference Providers\n\n"
+                            + "[Free] models work on free accounts.\n"
+                            + "[Paid] models require HF PRO subscription."
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { infoProvider = null }) { Text("Got it") }
+            }
         )
     }
 
@@ -149,24 +182,39 @@ fun SettingsScreen(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         ApiProvider.entries.forEach { provider ->
-                            FilterChip(
-                                selected = settings.selectedProvider == provider,
-                                onClick = { viewModel.setProvider(provider) },
-                                label = { Text(provider.displayName) },
-                                leadingIcon = if (settings.selectedProvider == provider) {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                } else null,
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                FilterChip(
+                                    selected = settings.selectedProvider == provider,
+                                    onClick = { viewModel.setProvider(provider) },
+                                    label = { Text(provider.displayName) },
+                                    leadingIcon = if (settings.selectedProvider == provider) {
+                                        {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    } else null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = { infoProvider = provider },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Info,
+                                        contentDescription = "Info",
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -183,12 +231,7 @@ fun SettingsScreen(
 
                     if (settings.selectedProvider == ApiProvider.HUGGING_FACE) {
                         Text(
-                            text = "Token: huggingface.co/settings/tokens",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "[Free] modeller ucretsiz, [Pro] icin HF Pro aboneligi gerekir",
+                            text = "Tap ⓘ next to a provider for setup instructions",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
